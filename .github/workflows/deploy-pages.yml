@@ -37,14 +37,16 @@ jobs:
       - name: Build (Vite + SPA 404 fallback)
         run: npm run build:pages
         env:
-          # Vite build-time env injection — GitHub repo Variables'tan okunur.
-          # Settings → Secrets and variables → Actions → Variables tab'ında set edilir.
+          # Azure + ana Dataverse URL → repo Variables'tan (sensitive değil ama
+          # tenant-spesifik değerler, env'lere göre değişebilir).
           VITE_AZURE_CLIENT_ID: ${{ vars.VITE_AZURE_CLIENT_ID }}
           VITE_AZURE_TENANT_ID: ${{ vars.VITE_AZURE_TENANT_ID }}
           VITE_DATAVERSE_URL: ${{ vars.VITE_DATAVERSE_URL }}
-          VITE_DATAVERSE_ENTITY: ${{ vars.VITE_DATAVERSE_ENTITY }}
-          VITE_HISTORICAL_DATAVERSE_URL: ${{ vars.VITE_HISTORICAL_DATAVERSE_URL }}
-          VITE_HISTORICAL_SALES_ENTITY: ${{ vars.VITE_HISTORICAL_SALES_ENTITY }}
+          # Entity adları + historical URL → workflow'da hardcoded (config-only,
+          # secret değil; zaten README ve bundle'da görünür).
+          VITE_DATAVERSE_ENTITY: mserp_tryaiinventoryagingreportentities
+          VITE_HISTORICAL_DATAVERSE_URL: https://operations-tiryaki.crm4.dynamics.com
+          VITE_HISTORICAL_SALES_ENTITY: mserp_tryhistoricalsalesdemandentities
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
