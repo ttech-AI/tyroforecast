@@ -12,6 +12,22 @@ import { HugeiconsIcon } from '@hugeicons/react'
 import { ChartAnalysisIcon, AiBrain03Icon, ArrowDown01Icon } from '@hugeicons/core-free-icons'
 import { Star } from 'lucide-react'
 import { fmtTon, fmtMonthKey } from '../../lib/forecast/format.js'
+import { FORECAST_MODELS } from '../../lib/forecast/salesForecast.js'
+
+// FORECAST_MODELS'i id → meta haritasına çevir (tooltip için)
+type ModelMeta = {
+  id: string
+  label: string
+  short?: string
+  description?: string
+  strength?: string
+  weakness?: string
+  whenToUse?: string
+}
+const MODEL_META: Record<string, ModelMeta> = (FORECAST_MODELS as ModelMeta[]).reduce(
+  (acc, m) => { acc[m.id] = m; return acc },
+  {} as Record<string, ModelMeta>,
+)
 
 type Model = {
   id: string
@@ -40,6 +56,9 @@ export function ForecastMiniChart({ snapshot }: { snapshot: Snapshot }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const btnRef = useRef<HTMLButtonElement>(null)
   const [menuPos, setMenuPos] = useState<{ x: number; y: number; w: number } | null>(null)
+  // Model hover tooltip — menü kapanınca sıfırlanır
+  const [hoveredModelId, setHoveredModelId] = useState<string | null>(null)
+  const [modelTipPos, setModelTipPos] = useState<{ x: number; y: number; alignRight: boolean } | null>(null)
 
   // Snapshot değişirse (yeni hesaplama) bestModel'e dön
   useEffect(() => {
@@ -68,6 +87,11 @@ export function ForecastMiniChart({ snapshot }: { snapshot: Snapshot }) {
       window.removeEventListener('scroll', update, true)
       document.removeEventListener('mousedown', onDoc)
     }
+  }, [menuOpen])
+
+  // Menü kapandığında hover tooltip'i de sıfırla
+  useEffect(() => {
+    if (!menuOpen) { setHoveredModelId(null); setModelTipPos(null) }
   }, [menuOpen])
 
   // Aktif model + geriye uyumluluk (snapshot.models yoksa forecastMonths fallback)
@@ -258,6 +282,20 @@ export function ForecastMiniChart({ snapshot }: { snapshot: Snapshot }) {
                       type="button"
                       disabled={m.skipped}
                       onClick={() => { setActiveId(m.id); setMenuOpen(false) }}
+                      onMouseEnter={(e) => {
+                        const r = (e.currentTarget as HTMLButtonElement).getBoundingClientRect()
+                        const tipW = 320
+                        const gap = 10
+                        // Tercih: solda göster (dropdown sağ üst köşede); sığmıyorsa sağa
+                        const fitsLeft = r.left - tipW - gap > 8
+                        setHoveredModelId(m.id)
+                        setModelTipPos({
+                          x: fitsLeft ? r.left - tipW - gap : r.right + gap,
+                          y: Math.max(8, r.top),
+                          alignRight: !fitsLeft,
+                        })
+                      }}
+                      onMouseLeave={() => { setHoveredModelId(null); setModelTipPos(null) }}
                       className={`flex w-full items-center justify-between gap-2 px-3 py-2 text-[12px] transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
                         isActive
                           ? 'bg-primary/8 font-bold text-primary'
@@ -284,6 +322,65 @@ export function ForecastMiniChart({ snapshot }: { snapshot: Snapshot }) {
               })}
             </ul>
           </div>,
+          document.body,
+        )}
+
+        {/* Model detay tooltip — hover'da model meta bilgisi */}
+        {hoveredModelId && modelTipPos && MODEL_META[hoveredModelId] && typeof document !== 'undefined' && createPortal(
+          (() => {
+            const meta = MODEL_META[hoveredModelId]
+            return (
+              <div
+                role="tooltip"
+                className="pointer-events-none"
+                style={{
+                  position: 'fixed',
+                  left: modelTipPos.x,
+                  top: modelTipPos.y,
+                  width: 320,
+                  zIndex: 70,
+                  background: 'linear-gradient(180deg, #1e293b, #0f172a)',
+                  color: '#fff',
+                  borderRadius: 12,
+                  padding: '12px 14px',
+                  boxShadow: '0 16px 36px rgba(0,0,0,0.32), inset 0 1px 0 rgba(255,255,255,0.06)',
+                  border: '1px solid rgba(148,163,184,0.18)',
+                  fontSize: 11.5,
+                  lineHeight: 1.5,
+                }}
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-[13px] font-extrabold tracking-tight text-white">{meta.label}</span>
+                  {meta.short && (
+                    <span className="rounded-md bg-white/10 px-1.5 py-0.5 text-[9.5px] font-bold uppercase tracking-wider text-amber-200">
+                      {meta.short}
+                    </span>
+                  )}
+                </div>
+                {meta.description && (
+                  <p className="mt-2 text-[11px] text-slate-200/85">{meta.description}</p>
+                )}
+                {meta.strength && (
+                  <div className="mt-2">
+                    <div className="text-[9.5px] font-extrabold uppercase tracking-wider text-emerald-300">Güçlü Yön</div>
+                    <p className="mt-0.5 text-[11px] text-slate-200/85">{meta.strength}</p>
+                  </div>
+                )}
+                {meta.weakness && (
+                  <div className="mt-2">
+                    <div className="text-[9.5px] font-extrabold uppercase tracking-wider text-rose-300">Zayıf Yön</div>
+                    <p className="mt-0.5 text-[11px] text-slate-200/85">{meta.weakness}</p>
+                  </div>
+                )}
+                {meta.whenToUse && (
+                  <div className="mt-2">
+                    <div className="text-[9.5px] font-extrabold uppercase tracking-wider text-amber-300">Ne Zaman?</div>
+                    <p className="mt-0.5 text-[11px] text-slate-200/85">{meta.whenToUse}</p>
+                  </div>
+                )}
+              </div>
+            )
+          })(),
           document.body,
         )}
       </header>

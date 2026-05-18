@@ -5,17 +5,14 @@
 // Snapshot'tan beslenir; her kartın kendine has accent rengi + hover etkisi.
 // ════════════════════════════════════════════════════════════════════════════
 
-import { type ReactNode } from 'react'
 import { HugeiconsIcon } from '@hugeicons/react'
 import {
   PackageIcon,
   DashboardSquareAddIcon,
   UserAccountIcon,
   ChartLineData01Icon,
-  TradeUpIcon,
-  TradeDownIcon,
 } from '@hugeicons/core-free-icons'
-import { fmtNumber, fmtTon, fmtPct } from '../../lib/forecast/format.js'
+import { fmtNumber, fmtTon } from '../../lib/forecast/format.js'
 import { useCountUp } from '../../lib/anim/useCountUp.js'
 
 type Snapshot = {
@@ -77,11 +74,6 @@ export function ExecutiveKpiCards({ snapshot }: { snapshot: Snapshot }) {
         valueNumber={snapshot.totalQtyLast12}
         valueFmt={fmtTon}
         sub={qtySub}
-        trailingPill={
-          snapshot.yoy != null && (
-            <YoyPill yoy={snapshot.yoy} />
-          )
-        }
       />
       <KpiCard
         accent="#f07a23"
@@ -115,15 +107,14 @@ export function ExecutiveKpiCards({ snapshot }: { snapshot: Snapshot }) {
 
 type KpiCardProps = {
   accent: string
-  icon: ReactNode
+  icon: React.ReactNode
   label: string
   valueNumber: number
   valueFmt: (n: number) => string
   sub: string
-  trailingPill?: ReactNode
 }
 
-function KpiCard({ accent, icon, label, valueNumber, valueFmt, sub, trailingPill }: KpiCardProps) {
+function KpiCard({ accent, icon, label, valueNumber, valueFmt, sub }: KpiCardProps) {
   // Counting-up animasyonu (mount'ta veya snapshot değiştiğinde)
   const animated = useCountUp(valueNumber, { duration: 700 })
 
@@ -137,14 +128,11 @@ function KpiCard({ accent, icon, label, valueNumber, valueFmt, sub, trailingPill
         className="absolute inset-x-0 bottom-0 h-[2px] origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100"
         style={{ background: `linear-gradient(90deg, ${accent}33, ${accent})` }}
       />
-      <header className="flex items-start justify-between gap-2">
-        <div className="flex items-center gap-2">
-          {icon}
-          <span className="text-[10.5px] font-extrabold uppercase tracking-wider text-muted-foreground">
-            {label}
-          </span>
-        </div>
-        {trailingPill}
+      <header className="flex items-center gap-2">
+        {icon}
+        <span className="text-[10.5px] font-extrabold uppercase tracking-wider text-muted-foreground">
+          {label}
+        </span>
       </header>
       <p
         className="mt-3 text-[22px] font-extrabold leading-none tracking-tight tabular-nums text-foreground md:text-[26px]"
@@ -159,18 +147,3 @@ function KpiCard({ accent, icon, label, valueNumber, valueFmt, sub, trailingPill
   )
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-
-function YoyPill({ yoy }: { yoy: number }) {
-  const positive = yoy >= 0
-  return (
-    <span
-      className={`inline-flex items-center gap-0.5 rounded-md px-1.5 py-0.5 text-[9.5px] font-extrabold tabular-nums ${
-        positive ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'
-      }`}
-    >
-      <HugeiconsIcon icon={positive ? TradeUpIcon : TradeDownIcon} size={9} strokeWidth={2.4} />
-      {fmtPct(yoy)}
-    </span>
-  )
-}

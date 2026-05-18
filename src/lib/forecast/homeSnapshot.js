@@ -100,9 +100,9 @@ export function buildHomeSnapshot({
     models,
     intermittenceIndex: profile.intermittenceIndex ?? null,
     character: profile.character || '—',
-    // Top breakdown (zaten { id, name, qty, pct })
-    topProducts: (profile.topProducts || []).slice(0, 5),
-    topCustomers: (profile.topDestinations || profile.topAccounts || []).slice(0, 5),
+    // Top breakdown (zaten { id, name, qty, pct }) — Anasayfa kartlarında 3'er göster
+    topProducts: (profile.topProducts || []).slice(0, 3),
+    topCustomers: (profile.topDestinations || profile.topAccounts || []).slice(0, 3),
     topCompanies: (profile.topCompanies || []).slice(0, 3),
     // Geçmiş veri — chart + seasonal hesaplamaları için son 24 ay
     historyKeys: histKeys.slice(-24),

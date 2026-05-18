@@ -92,29 +92,36 @@ function DashboardHome({ onGoToForecast }: { onGoToForecast: () => void }) {
       </div>
 
       {/* Row 3 — 3 top breakdown kartı (taç ikonları, 3 farklı varyant + renk) */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 lg:gap-5">
-        <TopBreakdownCard
-          icon={CrownIcon}
-          accent="#8b5cf6"
-          title="Top Müşteriler"
-          subtitle={`${snapshot.topCustomers.length} müşteri · hacim sırasına göre`}
-          items={snapshot.topCustomers}
-        />
-        <TopBreakdownCard
-          icon={Crown02Icon}
-          accent="#f07a23"
-          title="Top Ürünler"
-          subtitle={`${snapshot.topProducts.length} ürün · toplam paydan`}
-          items={snapshot.topProducts}
-        />
-        <TopBreakdownCard
-          icon={Crown03Icon}
-          accent="#0a3d8f"
-          title="Top Şirketler"
-          subtitle={`${snapshot.topCompanies.length} grup · origin payı`}
-          items={snapshot.topCompanies}
-        />
-      </div>
+      {(() => {
+        const topCustomers = snapshot.topCustomers.slice(0, 3)
+        const topProducts = snapshot.topProducts.slice(0, 3)
+        const topCompanies = snapshot.topCompanies.slice(0, 3)
+        return (
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 lg:gap-5">
+            <TopBreakdownCard
+              icon={CrownIcon}
+              accent="#8b5cf6"
+              title="Top Müşteriler"
+              subtitle={`${topCustomers.length} müşteri · hacim sırasına göre`}
+              items={topCustomers}
+            />
+            <TopBreakdownCard
+              icon={Crown02Icon}
+              accent="#f07a23"
+              title="Top Ürünler"
+              subtitle={`${topProducts.length} ürün · toplam paydan`}
+              items={topProducts}
+            />
+            <TopBreakdownCard
+              icon={Crown03Icon}
+              accent="#0a3d8f"
+              title="Top Şirketler"
+              subtitle={`${topCompanies.length} grup · origin payı`}
+              items={topCompanies}
+            />
+          </div>
+        )
+      })()}
 
       {/* Row 4 — Mevsim Profili + Aktivite Gauge */}
       <SeasonalActivityStrip snapshot={snapshot} />
