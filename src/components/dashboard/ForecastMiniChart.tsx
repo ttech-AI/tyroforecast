@@ -122,10 +122,10 @@ export function ForecastMiniChart({ snapshot }: { snapshot: Snapshot }) {
   const allUpper = [...histRecent.qty, ...fcUpper.map((v, i) => v ?? fcQty[i] ?? 0)]
   const maxVal = Math.max(1, ...allUpper)
 
-  // SVG geometri — daha büyük (full-width row)
-  const W = 1000
-  const H = 280
-  const padT = 20, padB = 30, padL = 14, padR = 14
+  // SVG geometri — 1/3 col için compact (preserveAspectRatio='none' ile w-full'a stretch)
+  const W = 500
+  const H = 180
+  const padT = 14, padB = 26, padL = 10, padR = 10
   const innerW = W - padL - padR
   const innerH = H - padT - padB
   const xAt = (i: number) => padL + (allKeys.length <= 1 ? 0 : (i / (allKeys.length - 1)) * innerW)
@@ -295,13 +295,13 @@ export function ForecastMiniChart({ snapshot }: { snapshot: Snapshot }) {
           viewBox={`0 0 ${W} ${H}`}
           preserveAspectRatio="none"
           className="block w-full"
-          style={{ height: 'clamp(200px, 32vw, 320px)' }}
+          style={{ height: 'clamp(160px, 22vw, 220px)' }}
           onMouseMove={onMove}
           onMouseLeave={() => setHover(null)}
           aria-label="Forecast chart"
         >
-          {/* Y-axis grid (4 satır) */}
-          {[0.25, 0.5, 0.75].map((p) => (
+          {/* Y-axis grid (compact: 2 satır) */}
+          {[0.33, 0.66].map((p) => (
             <line
               key={p}
               x1={padL} x2={W - padR}
@@ -348,19 +348,18 @@ export function ForecastMiniChart({ snapshot }: { snapshot: Snapshot }) {
               r="3.5" fill="#0a3d8f" stroke="#fff" strokeWidth="1.5"
             />
           )}
-          {/* X axis sparse labels — her 3 ayda bir */}
+          {/* X axis labels — compact'ta sadece ilk / separator / son */}
           {allKeys.map((k, i) => {
             const isFirst = i === 0
             const isLast = i === allKeys.length - 1
             const isSep = i === histRecent.keys.length - 1
-            const showEvery3 = i % 3 === 0
-            if (!isFirst && !isLast && !isSep && !showEvery3) return null
+            if (!isFirst && !isLast && !isSep) return null
             const label = fmtMonthKey(k, { year: false }) + ' ' + String(k).slice(2, 4)
             return (
               <text
                 key={`lbl-${i}`}
-                x={xAt(i)} y={H - 10}
-                fontSize="10" fill="#64748b"
+                x={xAt(i)} y={H - 8}
+                fontSize="11" fill="#64748b"
                 textAnchor={isFirst ? 'start' : isLast ? 'end' : 'middle'}
               >
                 {label}

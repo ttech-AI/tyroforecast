@@ -81,11 +81,13 @@ function DashboardHome({ onGoToForecast }: { onGoToForecast: () => void }) {
       {/* Row 1 — 4 üst KPI */}
       <ExecutiveKpiCards snapshot={snapshot} />
 
-      {/* Row 2 — Executive Summary hero (full-width) */}
-      <ExecutiveSummaryHero snapshot={snapshot} />
-
-      {/* Row 3 — Forecast chart (full-width, geniş, model selector header'da) */}
-      <ForecastMiniChart snapshot={snapshot} />
+      {/* Row 2 — Executive Summary hero (2/3) + Forecast Mini Chart (1/3) */}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3 lg:gap-5">
+        <div className="lg:col-span-2">
+          <ExecutiveSummaryHero snapshot={snapshot} />
+        </div>
+        <ForecastMiniChart snapshot={snapshot} />
+      </div>
 
       {/* Row 3 — 3 top breakdown kartı (taç ikonları, 3 farklı varyant + renk) */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 lg:gap-5">

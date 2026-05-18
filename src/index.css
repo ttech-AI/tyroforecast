@@ -93,11 +93,24 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Clay focusRing spec */
+/* Clay focusRing spec — button/link gibi interaktif öğelerde keyboard accessibility */
 :focus-visible {
   outline: 2px solid currentColor;
   outline-offset: 2px;
   border-radius: var(--radius);
+}
+/* Form elementlerinde global focus ring'i devre dışı bırak — her input/textarea/select
+   kendi parent label/wrapper styling'i ile focus durumunu gösterir (ör. SearchBar
+   focus-within:border-primary/35 + soft glow ring). */
+input:focus,
+input:focus-visible,
+textarea:focus,
+textarea:focus-visible,
+select:focus,
+select:focus-visible {
+  outline: none !important;
+  outline-offset: 0;
+  box-shadow: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
