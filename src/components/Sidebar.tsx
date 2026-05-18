@@ -109,12 +109,9 @@ export function Sidebar({ activePage, onPageChange, pinned, onTogglePin }: Sideb
           title={pinned ? 'Sabitlemeyi kaldır' : 'Sidebar\'ı sabitle'}
           className={`ml-auto grid h-7 w-7 shrink-0 place-items-center rounded-md transition-all duration-200 ${visibilityCls(pinned)} ${
             pinned
-              ? 'text-primary shadow-[0_0_0_1px_rgba(10,61,143,0.25),inset_0_1px_0_rgba(255,255,255,0.5)]'
+              ? 'text-primary'
               : 'text-foreground/50 hover:bg-muted/60 hover:text-foreground'
           }`}
-          style={pinned ? {
-            background: 'linear-gradient(135deg, rgba(10,61,143,0.08), rgba(240,122,35,0.06))',
-          } : undefined}
         >
           <Pin
             className={`h-3.5 w-3.5 transition-transform duration-200 ${pinned ? 'rotate-0' : 'rotate-45'}`}
@@ -306,7 +303,14 @@ function ProfileItem({ pinned }: { pinned: boolean }) {
   }
 
   return (
-    <div className="mt-2 border-t border-border/40 pt-2">
+    <div>
+      {/* Üst ayraç — sadece sidebar açıkken (pinned veya hover) görünür ve yer kaplar */}
+      <div
+        aria-hidden="true"
+        className={`mx-1 h-px bg-border/40 ${
+          pinned ? 'my-2 block' : 'hidden lg:group-hover:my-2 lg:group-hover:block'
+        }`}
+      />
       <button
         ref={btnRef}
         type="button"
@@ -408,8 +412,13 @@ function ProfileItem({ pinned }: { pinned: boolean }) {
 // ────────────────────────────────────────────────────────────────────────────
 function FooterBrand({ pinned }: { pinned: boolean }) {
   const year = new Date().getFullYear()
+  // Collapsed mode: display:none (yer kaplamıyor). Expanded: visible (block).
+  // Pinned: her zaman block. Değilse hover ile.
+  const wrapperCls = pinned
+    ? 'mt-3 block'
+    : 'hidden lg:group-hover:mt-3 lg:group-hover:block'
   return (
-    <div className={`mt-2 ${visibilityCls(pinned)}`}>
+    <div className={wrapperCls}>
       {/* Gradient ayraç */}
       <div
         aria-hidden="true"

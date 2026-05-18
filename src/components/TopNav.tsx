@@ -285,19 +285,11 @@ function DateTimeDisplay() {
 
   return (
     <div
-      className="hidden items-center gap-2.5 rounded-xl border border-border/60 bg-card/80 px-3 py-1.5 shadow-[0_1px_2px_rgba(15,23,42,0.04),inset_0_1px_0_rgba(255,255,255,0.6)] backdrop-blur md:flex"
+      className="hidden items-center gap-2.5 md:flex"
       title={`${parts.weekday}, ${parts.day} ${parts.month} ${parts.year}`}
     >
-      {/* Calendar icon — accent stroke-bordered mini kutu */}
-      <span
-        className="grid h-7 w-7 place-items-center rounded-lg border-[1.5px]"
-        style={{
-          borderColor: 'rgba(10,61,143,0.22)',
-          background: 'linear-gradient(135deg, rgba(10,61,143,0.05), rgba(240,122,35,0.04))',
-        }}
-      >
-        <HugeiconsIcon icon={Calendar03Icon} size={14} strokeWidth={1.9} color="#0a3d8f" />
-      </span>
+      {/* Calendar icon — düz, arka plan yok */}
+      <HugeiconsIcon icon={Calendar03Icon} size={18} strokeWidth={1.8} color="#0a3d8f" />
 
       {/* Date + time stack */}
       <div className="hidden flex-col leading-tight lg:flex">
@@ -307,16 +299,7 @@ function DateTimeDisplay() {
         <span className="flex items-baseline gap-1.5 text-[12.5px] font-bold tabular-nums text-foreground">
           <span>{parts.day} {parts.month}</span>
           <span className="h-3 w-px bg-border/80" aria-hidden="true" />
-          <span
-            className="font-extrabold tracking-tight"
-            style={{
-              backgroundImage: 'linear-gradient(135deg, #0a3d8f, #3b82f6 60%, #f07a23)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
-              color: 'transparent',
-            }}
-          >
+          <span className="font-extrabold tracking-tight text-foreground">
             {parts.time}
           </span>
         </span>
