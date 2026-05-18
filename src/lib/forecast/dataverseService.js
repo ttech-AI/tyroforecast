@@ -17,12 +17,21 @@ export const MSAL_ENABLED = !!(CLIENT_ID && TENANT_ID);
 
 let msalInstance = null;
 
+// MSAL redirect URI — Vite'ın BASE_URL'i ile birlikte origin'i kullan.
+// Dev'de: http://localhost:5173/
+// GitHub Pages prod'da: https://ttech-ai.github.io/tyroforecast/
+// Bu URI, Azure App Registration → Authentication → SPA platform'unda kayıtlı olmalı.
+const BASE_URL = (import.meta.env.BASE_URL || '/');
+const redirectUri = (typeof window !== 'undefined')
+  ? `${window.location.origin}${BASE_URL}`.replace(/\/+$/, '/')
+  : '/';
+
 const msalConfig = {
   auth: {
     clientId: CLIENT_ID || '',
     authority: `https://login.microsoftonline.com/${TENANT_ID || ''}`,
-    redirectUri: window.location.origin,
-    postLogoutRedirectUri: window.location.origin,
+    redirectUri,
+    postLogoutRedirectUri: redirectUri,
   },
   cache: { cacheLocation: 'sessionStorage', storeAuthStateInCookie: false },
 };
@@ -62,7 +71,7 @@ export async function loginRedirect() {
 
 export async function logout(account) {
   if (!msalInstance) return;
-  await msalInstance.logoutRedirect({ account, postLogoutRedirectUri: window.location.origin });
+  await msalInstance.logoutRedirect({ account, postLogoutRedirectUri: redirectUri });
 }
 
 export async function getGraphToken(account) {

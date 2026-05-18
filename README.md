@@ -178,26 +178,28 @@ adjusted[i] = item[i].forecast × factor
 
 ## 🚢 Deploy
 
-### Yol A — GitHub Pages (`gh-pages` branch, runner gerek yok)
+### Yol A — GitHub Pages (`gh-pages` branch, runner gerek yok) ✅
+
+Setup hazır. Sadece komut:
 
 ```powershell
-npm install --save-dev gh-pages
+npm run deploy
 ```
 
-`vite.config.ts`:
-```ts
-base: process.env.NODE_ENV === 'production' ? '/tyroforecast/' : '/',
-```
+Bu komut:
+1. `tsc -b && vite build` — production build (`/tyroforecast/` base path ile)
+2. `node scripts/copy-404.mjs` — `dist/404.html` oluşturur (SPA fallback)
+3. `gh-pages -d dist -b gh-pages` — `dist/` içeriğini `gh-pages` branch'ine push eder
 
-`package.json` scripts:
-```json
-"predeploy": "npm run build",
-"deploy": "gh-pages -d dist -b gh-pages"
-```
+**İlk kurulum** (sadece bir kez):
+1. GitHub repo → Settings → Pages → **Source: "Deploy from a branch"** → Branch: `gh-pages` → `/ (root)` → Save
+2. Azure App Registration → Authentication → SPA Redirect URI'lere ekle:
+   - `https://ttech-ai.github.io/tyroforecast/`
+3. (Opsiyonel) Custom domain kullanılacaksa `public/CNAME` dosyası oluştur
 
-GitHub Pages settings → Source: `Deploy from a branch` → `gh-pages` / `(root)`.
+Yayın URL'i: **https://ttech-ai.github.io/tyroforecast/**
 
-⚠️ Yayın URL'ini Azure App Registration → Authentication → SPA Redirect URI listesine ekle.
+> ⚠️ Vite `base` path'i `vite.config.ts`'de `'/tyroforecast/'` olarak hardcoded. Repo adı değişirse veya custom domain kullanılacaksa `BASE_PATH=/yeni-path/` env var'ı ile override edilebilir.
 
 ### Yol B — Self-hosted runner (GHE Actions)
 
