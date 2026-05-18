@@ -21,6 +21,9 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
+    # Environment-level Variables/Secrets'a erişim için: user "github-pages"
+    # environment'ına ekledilerse de inject olsun.
+    environment: github-pages
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -34,31 +37,36 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Debug — repo Variables injection check
+      - name: Debug — Variables/Secrets injection check
         run: |
-          echo "=== Repo Variables (set/empty kontrolü, değer maskeli) ==="
-          echo "VITE_AZURE_CLIENT_ID: ${{ vars.VITE_AZURE_CLIENT_ID != '' && 'SET' || 'EMPTY' }}"
-          echo "VITE_AZURE_TENANT_ID: ${{ vars.VITE_AZURE_TENANT_ID != '' && 'SET' || 'EMPTY' }}"
-          echo "VITE_DATAVERSE_URL:   ${{ vars.VITE_DATAVERSE_URL != '' && 'SET' || 'EMPTY' }}"
-          echo "İlk 8 karakter (debug — public client ID zaten gizli değil):"
+          echo "=== Variables tab ==="
+          echo "vars.VITE_AZURE_CLIENT_ID: ${{ vars.VITE_AZURE_CLIENT_ID != '' && 'SET' || 'EMPTY' }}"
+          echo "vars.VITE_AZURE_TENANT_ID: ${{ vars.VITE_AZURE_TENANT_ID != '' && 'SET' || 'EMPTY' }}"
+          echo "vars.VITE_DATAVERSE_URL:   ${{ vars.VITE_DATAVERSE_URL != '' && 'SET' || 'EMPTY' }}"
+          echo ""
+          echo "=== Secrets tab ==="
+          echo "secrets.VITE_AZURE_CLIENT_ID: ${{ secrets.VITE_AZURE_CLIENT_ID != '' && 'SET' || 'EMPTY' }}"
+          echo "secrets.VITE_AZURE_TENANT_ID: ${{ secrets.VITE_AZURE_TENANT_ID != '' && 'SET' || 'EMPTY' }}"
+          echo "secrets.VITE_DATAVERSE_URL:   ${{ secrets.VITE_DATAVERSE_URL != '' && 'SET' || 'EMPTY' }}"
+          echo ""
+          echo "=== Effective values (vars önce, secrets fallback) ==="
           echo "CLIENT_ID prefix:  ${VITE_AZURE_CLIENT_ID:0:8}"
           echo "TENANT_ID prefix:  ${VITE_AZURE_TENANT_ID:0:8}"
           echo "DV URL prefix:     ${VITE_DATAVERSE_URL:0:20}"
         env:
-          VITE_AZURE_CLIENT_ID: ${{ vars.VITE_AZURE_CLIENT_ID }}
-          VITE_AZURE_TENANT_ID: ${{ vars.VITE_AZURE_TENANT_ID }}
-          VITE_DATAVERSE_URL: ${{ vars.VITE_DATAVERSE_URL }}
+          VITE_AZURE_CLIENT_ID: ${{ vars.VITE_AZURE_CLIENT_ID || secrets.VITE_AZURE_CLIENT_ID }}
+          VITE_AZURE_TENANT_ID: ${{ vars.VITE_AZURE_TENANT_ID || secrets.VITE_AZURE_TENANT_ID }}
+          VITE_DATAVERSE_URL: ${{ vars.VITE_DATAVERSE_URL || secrets.VITE_DATAVERSE_URL }}
 
       - name: Build (Vite + SPA 404 fallback)
         run: npm run build:pages
         env:
-          # Azure + ana Dataverse URL → repo Variables'tan (sensitive değil ama
-          # tenant-spesifik değerler, env'lere göre değişebilir).
-          VITE_AZURE_CLIENT_ID: ${{ vars.VITE_AZURE_CLIENT_ID }}
-          VITE_AZURE_TENANT_ID: ${{ vars.VITE_AZURE_TENANT_ID }}
-          VITE_DATAVERSE_URL: ${{ vars.VITE_DATAVERSE_URL }}
-          # Entity adları + historical URL → workflow'da hardcoded (config-only,
-          # secret değil; zaten README ve bundle'da görünür).
+          # Hem Variables hem Secrets sekmesinden oku (Variables öncelikli).
+          # User hangi sekmeye ekledi belirsiz → her ikisini de destekle.
+          VITE_AZURE_CLIENT_ID: ${{ vars.VITE_AZURE_CLIENT_ID || secrets.VITE_AZURE_CLIENT_ID }}
+          VITE_AZURE_TENANT_ID: ${{ vars.VITE_AZURE_TENANT_ID || secrets.VITE_AZURE_TENANT_ID }}
+          VITE_DATAVERSE_URL: ${{ vars.VITE_DATAVERSE_URL || secrets.VITE_DATAVERSE_URL }}
+          # Entity adları + historical URL — config-only, workflow'da hardcoded
           VITE_DATAVERSE_ENTITY: mserp_tryaiinventoryagingreportentities
           VITE_HISTORICAL_DATAVERSE_URL: https://operations-tiryaki.crm4.dynamics.com
           VITE_HISTORICAL_SALES_ENTITY: mserp_tryhistoricalsalesdemandentities
