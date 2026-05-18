@@ -9,7 +9,7 @@ import { type ReactNode } from 'react'
 import { HugeiconsIcon } from '@hugeicons/react'
 import {
   PackageIcon,
-  WeightScale01Icon,
+  Summation01Icon,
   UserAccountIcon,
   ChartLineData01Icon,
   TradeUpIcon,
@@ -29,26 +29,54 @@ type Snapshot = {
 }
 
 export function ExecutiveKpiCards({ snapshot }: { snapshot: Snapshot }) {
-  // Top-3 müşteri toplam paydası (kartlarda mini insight için)
+  // ── User-friendly executive sub metinleri için hesaplar ──
+  // Top-3 müşteri toplam paydası
   const top3CustomerPct = snapshot.topCustomers.slice(0, 3).reduce((s, c) => s + (c.pct || 0), 0)
+  // Top-1 ürün payı (lider ürün konsantrasyonu)
+  const top1ProductPct = snapshot.topProducts[0]?.pct ?? 0
+  const top1ProductName = snapshot.topProducts[0]?.id ?? null
+
+  // Toplam Sipariş alt metni — kayıt sayısına göre nüanslı
+  const orderSub = snapshot.recordCount > 0
+    ? 'Geçmiş satış işlem kayıtları'
+    : 'Henüz işlem kaydı yok'
+
+  // Toplam Miktar alt metni — YoY varsa kısa, yoksa açıklayıcı
+  const qtySub = snapshot.yoy != null
+    ? 'Son 12 ayda gerçekleşen'
+    : 'Son 12 ay toplam satış'
+
+  // Toplam Müşteri alt metni — konsantrasyon insight'ı + risk uyarısı
+  let customerSub: string
+  if (snapshot.uniqueCustomers === 0) {
+    customerSub = 'Veri yok'
+  } else if (top3CustomerPct >= 60) {
+    customerSub = `Top 3 satışın %${top3CustomerPct.toFixed(0)}'i — yüksek bağımlılık`
+  } else if (top3CustomerPct > 0) {
+    customerSub = `Top 3 satışın %${top3CustomerPct.toFixed(0)}'ini oluşturuyor`
+  } else {
+    customerSub = 'Müşteri portföyü dağılımı'
+  }
+
+  // Toplam Ürün alt metni — lider ürün payı varsa onunla, yoksa portföy bilgisi
+  let productSub: string
+  if (snapshot.uniqueProducts === 0) {
+    productSub = 'Veri yok'
+  } else if (top1ProductName && top1ProductPct > 0) {
+    productSub = `Lider: ${top1ProductName} (%${top1ProductPct.toFixed(0)})`
+  } else {
+    productSub = 'Ürün portföyü genişliği'
+  }
 
   return (
     <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
       <KpiCard
-        accent="#f07a23"
-        icon={<HugeiconsIcon icon={ChartLineData01Icon} size={18} strokeWidth={1.9} color="#f07a23" />}
-        label="Toplam Sipariş"
-        valueNumber={snapshot.recordCount}
-        valueFmt={(n) => fmtNumber(Math.round(n))}
-        sub="Aylık aggregate kayıt"
-      />
-      <KpiCard
         accent="#0a3d8f"
-        icon={<HugeiconsIcon icon={WeightScale01Icon} size={18} strokeWidth={1.9} color="#0a3d8f" />}
+        icon={<HugeiconsIcon icon={Summation01Icon} size={18} strokeWidth={1.9} color="#0a3d8f" />}
         label="Toplam Miktar"
         valueNumber={snapshot.totalQtyLast12}
         valueFmt={fmtTon}
-        sub="Son 12 ay"
+        sub={qtySub}
         trailingPill={
           snapshot.yoy != null && (
             <YoyPill yoy={snapshot.yoy} />
@@ -56,12 +84,20 @@ export function ExecutiveKpiCards({ snapshot }: { snapshot: Snapshot }) {
         }
       />
       <KpiCard
+        accent="#f07a23"
+        icon={<HugeiconsIcon icon={ChartLineData01Icon} size={18} strokeWidth={1.9} color="#f07a23" />}
+        label="Toplam Sipariş"
+        valueNumber={snapshot.recordCount}
+        valueFmt={(n) => fmtNumber(Math.round(n))}
+        sub={orderSub}
+      />
+      <KpiCard
         accent="#10b981"
         icon={<HugeiconsIcon icon={UserAccountIcon} size={18} strokeWidth={1.9} color="#10b981" />}
         label="Toplam Müşteri"
         valueNumber={snapshot.uniqueCustomers}
         valueFmt={(n) => fmtNumber(Math.round(n))}
-        sub={`Top 3 toplam payın ${top3CustomerPct.toFixed(0)}%'i`}
+        sub={customerSub}
       />
       <KpiCard
         accent="#8b5cf6"
@@ -69,7 +105,7 @@ export function ExecutiveKpiCards({ snapshot }: { snapshot: Snapshot }) {
         label="Toplam Ürün"
         valueNumber={snapshot.uniqueProducts}
         valueFmt={(n) => fmtNumber(Math.round(n))}
-        sub={`${snapshot.topProducts.length} ürün ön planda`}
+        sub={productSub}
       />
     </div>
   )

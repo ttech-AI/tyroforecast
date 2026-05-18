@@ -8,7 +8,7 @@ import { ForecastMiniChart } from './components/dashboard/ForecastMiniChart'
 import { TopBreakdownCard } from './components/dashboard/TopBreakdownCard'
 import { SeasonalActivityStrip } from './components/dashboard/SeasonalActivityStrip'
 import { EmptyDashboard } from './components/dashboard/EmptyDashboard'
-import { DeliveryTruck01Icon, PackageIcon, FactoryIcon } from '@hugeicons/core-free-icons'
+import { CrownIcon, Crown02Icon, Crown03Icon } from '@hugeicons/core-free-icons'
 import { SalesForecastPage } from './components/SalesForecastPage.jsx'
 import { useMsal } from './lib/forecast/msalContext.jsx'
 import { useHomeSnapshot } from './lib/forecast/homeSnapshot.js'
@@ -81,32 +81,30 @@ function DashboardHome({ onGoToForecast }: { onGoToForecast: () => void }) {
       {/* Row 1 — 4 üst KPI */}
       <ExecutiveKpiCards snapshot={snapshot} />
 
-      {/* Row 2 — Executive Summary hero (2/3) + Forecast Mini Chart (1/3) */}
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3 lg:gap-5">
-        <div className="lg:col-span-2">
-          <ExecutiveSummaryHero snapshot={snapshot} />
-        </div>
-        <ForecastMiniChart snapshot={snapshot} />
-      </div>
+      {/* Row 2 — Executive Summary hero (full-width) */}
+      <ExecutiveSummaryHero snapshot={snapshot} />
 
-      {/* Row 3 — 3 top breakdown kartı (müşteri / ürün / şirket) */}
+      {/* Row 3 — Forecast chart (full-width, geniş, model selector header'da) */}
+      <ForecastMiniChart snapshot={snapshot} />
+
+      {/* Row 3 — 3 top breakdown kartı (taç ikonları, 3 farklı varyant + renk) */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 lg:gap-5">
         <TopBreakdownCard
-          icon={DeliveryTruck01Icon}
+          icon={CrownIcon}
           accent="#8b5cf6"
           title="Top Müşteriler"
           subtitle={`${snapshot.topCustomers.length} müşteri · hacim sırasına göre`}
           items={snapshot.topCustomers}
         />
         <TopBreakdownCard
-          icon={PackageIcon}
+          icon={Crown02Icon}
           accent="#f07a23"
           title="Top Ürünler"
           subtitle={`${snapshot.topProducts.length} ürün · toplam paydan`}
           items={snapshot.topProducts}
         />
         <TopBreakdownCard
-          icon={FactoryIcon}
+          icon={Crown03Icon}
           accent="#0a3d8f"
           title="Top Şirketler"
           subtitle={`${snapshot.topCompanies.length} grup · origin payı`}

@@ -6,7 +6,7 @@
 // ════════════════════════════════════════════════════════════════════════════
 
 import { HugeiconsIcon } from '@hugeicons/react'
-import { FlashIcon, ChartLineData01Icon, TradeUpIcon, PercentSquareIcon } from '@hugeicons/core-free-icons'
+import { AiBrain04Icon, ChartLineData01Icon, TradeUpIcon, PercentSquareIcon } from '@hugeicons/core-free-icons'
 import { motion } from 'framer-motion'
 import { buildExecutiveSummary } from '../../lib/forecast/buildExecutiveSummary.jsx'
 import { fmtTon, fmtPct } from '../../lib/forecast/format.js'
@@ -83,7 +83,7 @@ export function ExecutiveSummaryHero({ snapshot }: { snapshot: Snapshot }) {
             boxShadow: '0 0 18px rgba(240,122,35,0.20)',
           }}
         >
-          <HugeiconsIcon icon={FlashIcon} size={11} strokeWidth={2.5} />
+          <HugeiconsIcon icon={AiBrain04Icon} size={12} strokeWidth={2} />
           YÖNETİCİ ÖZETİ
         </motion.span>
 

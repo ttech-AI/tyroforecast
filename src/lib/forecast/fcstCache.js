@@ -8,7 +8,7 @@
 //   3. Hard cap: MAX_ENTRIES geçilince en eskiler düşürülür
 // ════════════════════════════════════════════════════════════════════════════
 
-const PREFIX = 'tyroforecast_fcst_v3_'
+const PREFIX = 'tyroforecast_fcst_v4_'
 const MAX_ENTRIES = 50          // toplam cache entry üst sınırı (LRU)
 const EVICT_BATCH = 5           // her quota hatası durumunda kaç entry düşürülecek
 const RETRY_LIMIT = 5           // quota hatası retry sayısı (her seferinde batch atıyoruz)

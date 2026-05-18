@@ -50,6 +50,28 @@ export function buildHomeSnapshot({
   }
   const forecastTotal = fcPoint.reduce((s, v) => s + (v || 0), 0)
 
+  // Tüm modellerin compact dizisi — Anasayfa chart'ında dropdown seçimi için
+  // Her model: { id, mape, skipped, point, lower, upper } — yaklaşık ~300 byte
+  const MODEL_LABELS = {
+    hw: 'Holt-Winters',
+    stl: 'STL+ETS',
+    stlOut: 'Outlier STL+ETS',
+    theta: 'Theta',
+    holtLin: "Holt's Linear",
+    snaive: 'Seasonal Naive',
+    croston: 'Croston',
+    ma3: 'Moving Avg',
+  }
+  const models = (fit?.results || []).map((r) => ({
+    id: r.id,
+    label: MODEL_LABELS[r.id] || r.id,
+    mape: r.mape ?? null,
+    skipped: !!r.skipped,
+    point: r.forecast?.point ?? [],
+    lower: r.forecast?.lower ?? [],
+    upper: r.forecast?.upper ?? [],
+  }))
+
   return {
     version: 1,
     fetchedAt: Date.now(),
@@ -75,6 +97,7 @@ export function buildHomeSnapshot({
     // Model + karakter
     bestModelId: bestId || null,
     bestModelMape: bestMape,
+    models,
     intermittenceIndex: profile.intermittenceIndex ?? null,
     character: profile.character || '—',
     // Top breakdown (zaten { id, name, qty, pct })

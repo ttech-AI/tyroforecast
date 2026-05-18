@@ -70,11 +70,13 @@ import {
 import { DEFAULT_SCENARIO } from '../lib/forecast/salesSimulation.js'
 import { buildHomeSnapshot, writeHomeSnapshot } from '../lib/forecast/homeSnapshot.js'
 import { readFcstCache, writeFcstCache, readFilterState, writeFilterState } from '../lib/forecast/fcstCache.js'
+import { AdvancedFilterDropdown } from './forecast/AdvancedFilterDropdown.jsx'
 
 // Cache key prefix — bump when payload shape changes
-// v3: mergeCompanyAliases artık name'i preserve ediyor — eski v2 cache'inde
-// şirket adı düşmüştü; bump ile invalidate ediliyor.
-const CACHE_PREFIX = 'tyroforecast_fcst_v3'
+// v4: payload artık uniqueProducts/Customers/Companies içeriyor (Anasayfa
+// dashboard KPI'ları için). Eski v3 cache'inde bu alanlar yoktu → 0 değerleri
+// snapshot'a yansıyordu, bu yüzden bump.
+const CACHE_PREFIX = 'tyroforecast_fcst_v4'
 const TRADER_CACHE_KEY = 'tyroforecast_traders_v1'
 
 // Group code → ana şirket çözücüsü (DTHY → DANE merge'i salesForecast içinde)
@@ -139,7 +141,7 @@ export function SalesForecastPage() {
   // ─────────────────────────────────────────────────────────────────────────
   // Result view state (Phase 3 — itemid hierarchy, scenarios)
   // ─────────────────────────────────────────────────────────────────────────
-  const [, setFcstChartView] = useState('total')
+  const [fcstChartView, setFcstChartView] = useState('total')
   const [fcstScenario] = useState(DEFAULT_SCENARIO)
   const [, setFcstScenarioResult] = useState(null)
   const fcstScenarioDebounceRef = useRef(null)
@@ -446,6 +448,9 @@ export function SalesForecastPage() {
         onScenarioToggle={() => setShowScenarios((v) => !v)}
         onExportExcel={() => exportHandlersRef.current.excel?.()}
         onExportPDF={() => exportHandlersRef.current.pdf?.()}
+        items={fcstResult?.itemForecasts || []}
+        chartView={fcstChartView}
+        setChartView={setFcstChartView}
       />
 
       {fcstError && (
@@ -468,6 +473,8 @@ export function SalesForecastPage() {
           setShowScenarios={setShowScenarios}
           onScenarioActiveChange={setScenarioActive}
           exportHandlersRef={exportHandlersRef}
+          chartView={fcstChartView}
+          setChartView={setFcstChartView}
         />
       )}
     </div>
@@ -493,6 +500,7 @@ function ResultView({
   result, fcstMetric, activeModelId, onSelectModel,
   showScenarios, setShowScenarios,
   onScenarioActiveChange, exportHandlersRef,
+  chartView = 'total', setChartView,
 }) {
   // ─── Derived state ───
   const useValue = fcstMetric === 'value' && result.valueAvailable && result.fitValue
@@ -528,9 +536,8 @@ function ResultView({
   const debounceRef = useRef(null)
 
   // ─── Chart view: 'total' veya item pid ───
-  // Gelişmiş Filtre butonu chart'ın header'ında; seçim sadece ForecastChart'ı değiştirir,
-  // KPI/MonthlyDetail/ModelComparison/MiniInsights trader-total üzerinde kalır.
-  const [chartView, setChartView] = useState('total')
+  // chartView ve setChartView artık parent (SalesForecastPage) state'i —
+  // Gelişmiş Filtre butonu FilterPanel'den kontrol edilebiliyor.
   const chartData = useMemo(() => {
     if (chartView === 'total' || !result.itemForecasts) {
       return {
@@ -1565,43 +1572,8 @@ function ForecastChart({
   const wrapRef = useRef(null)
   const [width, setWidth] = useState(900)
   const [hoverIdx, setHoverIdx] = useState(null)
-
-  // Gelişmiş Filtre dropdown state
-  const [filterOpen, setFilterOpen] = useState(false)
-  const [filterSearch, setFilterSearch] = useState('')
-  const filterBtnRef = useRef(null)
-  const [filterPos, setFilterPos] = useState(null)
-  useEffect(() => {
-    if (!filterOpen || !filterBtnRef.current) { setFilterPos(null); return }
-    const update = () => {
-      const r = filterBtnRef.current.getBoundingClientRect()
-      const w = 320
-      setFilterPos({ right: window.innerWidth - r.right, top: r.bottom + 6, w })
-    }
-    update()
-    window.addEventListener('resize', update)
-    window.addEventListener('scroll', update, true)
-    const onDoc = (e) => {
-      if (filterBtnRef.current && !filterBtnRef.current.contains(e.target) && !e.target.closest('[data-fcst-filter-menu]')) {
-        setFilterOpen(false)
-      }
-    }
-    document.addEventListener('mousedown', onDoc)
-    return () => {
-      window.removeEventListener('resize', update)
-      window.removeEventListener('scroll', update, true)
-      document.removeEventListener('mousedown', onDoc)
-    }
-  }, [filterOpen])
-
-  const filteredItems = useMemo(() => {
-    const q = filterSearch.trim().toLocaleLowerCase('tr-TR')
-    if (!q) return items
-    return items.filter((it) =>
-      it.pid.toLocaleLowerCase('tr-TR').includes(q) ||
-      (it.name || '').toLocaleLowerCase('tr-TR').includes(q)
-    )
-  }, [items, filterSearch])
+  // Gelişmiş Filtre artık FilterPanel'de (Hesapla yanında) — ForecastChart'taki
+  // local state ve UI kaldırıldı; bu component sadece chartView'ı okur.
 
   const isItemView = chartView !== 'total'
   const activeItem = isItemView ? items.find((it) => it.pid === chartView) : null
@@ -1744,223 +1716,10 @@ function ForecastChart({
           </div>
         </div>
 
-        <div className="ml-auto flex items-center gap-2">
-          {/* Gelişmiş Filtre butonu */}
-          {items.length > 0 && onChartViewChange && (
-            <div className="relative">
-              <button
-                ref={filterBtnRef}
-                type="button"
-                onClick={() => setFilterOpen((v) => !v)}
-                className="inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-[12px] font-semibold transition-all"
-                style={
-                  isItemView
-                    ? {
-                        background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
-                        borderColor: 'rgba(59,130,246,.55)',
-                        color: '#fff',
-                        boxShadow: '0 2px 8px rgba(59,130,246,.30), 0 1px 3px rgba(59,130,246,.20)',
-                      }
-                    : {
-                        background: '#fff',
-                        borderColor: 'rgba(59,130,246,.30)',
-                        color: '#1d4ed8',
-                        boxShadow: '0 1px 3px rgba(59,130,246,.08)',
-                      }
-                }
-              >
-                <HugeiconsIcon icon={MagicWand02Icon} size={13} strokeWidth={2} />
-                Gelişmiş Filtre
-                {isItemView && activeItem && (
-                  <span
-                    className="ml-0.5 inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-extrabold"
-                    style={{ background: 'rgba(255,255,255,.25)', color: '#fff', backdropFilter: 'blur(4px)' }}
-                  >
-                    {activeItem.pid}
-                  </span>
-                )}
-                <ChevronDown size={11} className={`transition ${filterOpen ? 'rotate-180' : ''}`} strokeWidth={2.2} />
-              </button>
-
-              {filterOpen && filterPos && (
-                <div
-                  data-fcst-filter-menu
-                  className="overflow-hidden rounded-xl border border-border bg-card shadow-[0_12px_36px_rgba(0,0,0,0.14),0_4px_12px_rgba(0,0,0,0.06)]"
-                  style={{
-                    position: 'fixed',
-                    right: filterPos.right,
-                    top: filterPos.top,
-                    width: filterPos.w,
-                    maxWidth: 'calc(100vw - 24px)',
-                    maxHeight: `min(560px, calc(100vh - ${filterPos.top + 20}px))`,
-                    zIndex: 50,
-                    display: 'flex',
-                    flexDirection: 'column',
-                  }}
-                >
-                  {/* Üst gradient şerit */}
-                  <div aria-hidden="true" className="h-[3px] shrink-0" style={{ background: 'linear-gradient(90deg, #3b82f6, #6366f1, #8b5cf6)' }} />
-
-                  {/* Header */}
-                  <div
-                    className="flex shrink-0 items-center gap-2 border-b border-border px-4 py-3"
-                    style={{ background: 'linear-gradient(135deg, rgba(59,130,246,.05), rgba(99,102,241,.02))' }}
-                  >
-                    <HugeiconsIcon icon={MagicWand02Icon} size={14} strokeWidth={2} className="text-primary" />
-                    <div className="flex-1">
-                      <div className="text-[12.5px] font-extrabold tracking-tight text-foreground">Gelişmiş Filtre</div>
-                      <div className="text-[10px] font-medium text-muted-foreground">Görüntüleme kapsamını seçin</div>
-                    </div>
-                    <InfoTip
-                      title="Gelişmiş Filtre"
-                      desc="Grafiği trader toplamı yerine tek bir ürünün serisi üzerinde görüntüle. Diğer tablolar trader-total üzerinde kalır."
-                      iconSize={10}
-                    />
-                  </div>
-
-                  {/* Trader Total */}
-                  <div className="shrink-0 border-b border-border px-3 py-3">
-                    <div className="mb-2 flex items-center gap-1 text-[9.5px] font-extrabold uppercase tracking-wider text-muted-foreground">
-                      <HugeiconsIcon icon={UserGroup02Icon} size={11} strokeWidth={2.2} />
-                      Trader Kapsamı
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => { onChartViewChange('total'); setFilterOpen(false); setFilterSearch('') }}
-                      className="flex w-full items-center gap-2.5 rounded-lg border p-2.5 transition"
-                      style={
-                        !isItemView
-                          ? {
-                              background: 'linear-gradient(135deg, rgba(59,130,246,.10), rgba(139,92,246,.04))',
-                              borderColor: 'rgba(59,130,246,.30)',
-                            }
-                          : { background: '#fafbfc', borderColor: 'rgba(226,232,240,.8)' }
-                      }
-                    >
-                      <span
-                        className="grid h-8 w-8 shrink-0 place-items-center rounded-lg"
-                        style={
-                          !isItemView
-                            ? {
-                                background: 'linear-gradient(135deg, #3b82f6, #6366f1)',
-                                color: '#fff',
-                                boxShadow: '0 2px 6px rgba(59,130,246,.25)',
-                              }
-                            : { background: 'rgba(59,130,246,.10)', color: '#1d4ed8' }
-                        }
-                      >
-                        <HugeiconsIcon icon={User03Icon} size={15} strokeWidth={2} />
-                      </span>
-                      <div className="min-w-0 flex-1 text-left">
-                        <div className={`truncate text-[12.5px] font-extrabold ${!isItemView ? 'text-primary' : 'text-foreground'}`}>
-                          Trader Toplamı
-                        </div>
-                        <div className="truncate text-[10.5px] font-medium text-muted-foreground">Tüm ürünlerin birleşik tahmini</div>
-                      </div>
-                      {!isItemView && (
-                        <span
-                          className="inline-flex items-center gap-0.5 rounded px-1.5 py-0.5 text-[9px] font-extrabold uppercase tracking-wider text-white"
-                          style={{ background: 'linear-gradient(135deg, #047857, #10b981)' }}
-                        >
-                          ● Aktif
-                        </span>
-                      )}
-                    </button>
-                  </div>
-
-                  {/* Tek Ürün */}
-                  <div className="shrink-0 border-b border-border px-3 py-3">
-                    <div className="mb-2 flex items-center gap-1 text-[9.5px] font-extrabold uppercase tracking-wider text-muted-foreground">
-                      <HugeiconsIcon icon={PackageIcon} size={11} strokeWidth={2.2} />
-                      Tek Ürün <span className="ml-1 font-medium normal-case tracking-normal">· Top {items.length}</span>
-                    </div>
-                    <div className="relative">
-                      <input
-                        type="text"
-                        value={filterSearch}
-                        onChange={(e) => setFilterSearch(e.target.value)}
-                        placeholder="Ürün kodu veya adı ara…"
-                        autoFocus
-                        className="w-full rounded-md border border-border bg-card px-3 py-1.5 text-[11.5px] font-medium text-foreground outline-none transition focus:border-primary/50 focus:bg-card"
-                      />
-                    </div>
-                  </div>
-
-                  {/* List */}
-                  <div className="min-h-0 flex-1 overflow-y-auto">
-                    {filteredItems.slice(0, 30).map((it) => {
-                      const sel = chartView === it.pid
-                      return (
-                        <button
-                          key={it.pid}
-                          type="button"
-                          onClick={() => { onChartViewChange(it.pid); setFilterOpen(false); setFilterSearch('') }}
-                          className="flex w-full items-center gap-2 border-b border-border px-3 py-2 text-left transition hover:bg-muted/30"
-                          style={sel ? { background: 'linear-gradient(135deg, rgba(59,130,246,.08), rgba(139,92,246,.04))' } : undefined}
-                        >
-                          {sel && <span className="absolute left-0 top-0 h-full w-[3px]" style={{ background: 'linear-gradient(180deg, #3b82f6, #6366f1)' }} />}
-                          <span
-                            className="inline-block h-1.5 w-1.5 shrink-0 rounded-full"
-                            style={{ background: sel ? 'linear-gradient(135deg, #3b82f6, #6366f1)' : '#cbd5e1' }}
-                          />
-                          <div className="min-w-0 flex-1">
-                            <div className={`truncate text-[11.5px] font-bold ${sel ? 'text-primary' : 'text-foreground'}`}>{it.pid}</div>
-                            {it.name && (
-                              <div className="truncate text-[10px] font-medium text-muted-foreground">{it.name}</div>
-                            )}
-                          </div>
-                          <span className="shrink-0 text-[10.5px] font-semibold tabular-nums text-muted-foreground">{fmtTon(it.last12)}</span>
-                          {it.isStable === false && (
-                            <span className="shrink-0 rounded bg-orange-100 px-1 py-0.5 text-[9px] font-extrabold tracking-wider text-orange-700">
-                              DÜZENSİZ
-                            </span>
-                          )}
-                        </button>
-                      )
-                    })}
-                    {filteredItems.length === 0 && (
-                      <div className="py-6 text-center text-[11px] italic text-muted-foreground">Eşleşme yok</div>
-                    )}
-                  </div>
-
-                  {/* Footer */}
-                  <div
-                    className="flex shrink-0 gap-2 border-t border-border px-3 py-2.5"
-                    style={{ background: 'linear-gradient(180deg, #fafbfc, #f5f7fa)' }}
-                  >
-                    <button
-                      type="button"
-                      onClick={() => { onChartViewChange('total'); setFilterSearch(''); setFilterOpen(false) }}
-                      disabled={!isItemView && !filterSearch}
-                      className="flex-1 rounded-md border border-rose-200 bg-card px-2.5 py-1.5 text-[11.5px] font-semibold text-rose-700 transition hover:border-rose-300 hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-40"
-                    >
-                      <HugeiconsIcon icon={RotateClockwiseIcon} size={11} strokeWidth={2} className="mr-1 inline" />
-                      Filtreyi Temizle
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setFilterOpen(false)}
-                      className="flex-1 rounded-md px-2.5 py-1.5 text-[11.5px] font-semibold text-white transition"
-                      style={{
-                        background: 'linear-gradient(135deg, #3b82f6, #6366f1)',
-                        boxShadow: '0 2px 6px rgba(59,130,246,.20)',
-                      }}
-                    >
-                      <HugeiconsIcon icon={Cancel01Icon} size={11} strokeWidth={2.4} className="mr-1 inline" />
-                      Kapat
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Legend */}
-          <div className="flex items-center gap-3 text-[11px] font-medium text-muted-foreground">
-            <Legend color="#0a3d8f" label="Geçmiş" />
-            <Legend color="#f07a23" label="Tahmin" dashed />
-            {forecastUp?.length > 0 && <Legend color="#f07a23" label="Güven aralığı" band />}
-          </div>
+        <div className="ml-auto flex items-center gap-3 text-[11px] font-medium text-muted-foreground">
+          <Legend color="#0a3d8f" label="Geçmiş" />
+          <Legend color="#f07a23" label="Tahmin" dashed />
+          {forecastUp?.length > 0 && <Legend color="#f07a23" label="Güven aralığı" band />}
         </div>
       </header>
 
@@ -3872,6 +3631,7 @@ function FilterPanel({
   fcstHorizon, setFcstHorizon, fcstMetric, setFcstMetric,
   runForecast, fcstLoading,
   hasResult, scenarioActive, onScenarioToggle, onExportExcel, onExportPDF,
+  items = [], chartView = 'total', setChartView,
 }) {
   const canRun = !fcstLoading && (fcstTrader.length > 0 || fcstAnaTrader.length > 0)
   const nothingSelected = !fcstAnaTrader.length && !fcstTrader.length
@@ -3959,6 +3719,13 @@ function FilterPanel({
               <HugeiconsIcon icon={AiAudioIcon} size={16} strokeWidth={1.9} />
               {fcstLoading ? 'Hesaplanıyor…' : 'Hesapla'}
             </button>
+            {hasResult && items.length > 0 && setChartView && (
+              <AdvancedFilterDropdown
+                items={items}
+                chartView={chartView}
+                onChartViewChange={setChartView}
+              />
+            )}
             {hasResult && (
               <>
                 <button
