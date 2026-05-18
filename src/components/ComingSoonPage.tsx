@@ -45,8 +45,8 @@ const META: Record<string, {
     description: (
       <>
         Dataverse entity'lerini tek panelden yönetebileceğin bir veri merkezi.
-        <strong className="text-foreground/90"> Trader dizini</strong>, <strong className="text-foreground/90">ürün kataloğu</strong>
-        {', '}<strong className="text-foreground/90">müşteri grupları</strong> ve şirket alias kuralları —
+        <strong className="text-amber-200"> Trader dizini</strong>, <strong className="text-amber-200">ürün kataloğu</strong>
+        {', '}<strong className="text-amber-200">müşteri grupları</strong> ve şirket alias kuralları —
         hepsi tek tıkla CSV / Excel'e yedeklenebilir ve doğrulama akışlarından geçirilebilir.
       </>
     ),

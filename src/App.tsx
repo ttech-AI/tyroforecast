@@ -84,7 +84,7 @@ function DashboardHome({ onGoToForecast }: { onGoToForecast: () => void }) {
       <ExecutiveKpiCards snapshot={snapshot} />
 
       {/* Row 2 — Executive Summary hero (2/3) + Forecast Mini Chart (1/3) */}
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3 lg:gap-5">
+      <div className="grid grid-cols-1 items-stretch gap-4 lg:grid-cols-3 lg:gap-5">
         <div className="lg:col-span-2">
           <ExecutiveSummaryHero snapshot={snapshot} />
         </div>
@@ -104,6 +104,7 @@ function DashboardHome({ onGoToForecast }: { onGoToForecast: () => void }) {
               title="Top Müşteriler"
               subtitle={`${topCustomers.length} müşteri · hacim sırasına göre`}
               items={topCustomers}
+              entityLabel="müşteri"
             />
             <TopBreakdownCard
               icon={Crown02Icon}
@@ -111,6 +112,7 @@ function DashboardHome({ onGoToForecast }: { onGoToForecast: () => void }) {
               title="Top Ürünler"
               subtitle={`${topProducts.length} ürün · toplam paydan`}
               items={topProducts}
+              entityLabel="ürün"
             />
             <TopBreakdownCard
               icon={Crown03Icon}
@@ -118,6 +120,7 @@ function DashboardHome({ onGoToForecast }: { onGoToForecast: () => void }) {
               title="Top Şirketler"
               subtitle={`${topCompanies.length} grup · origin payı`}
               items={topCompanies}
+              entityLabel="şirket"
             />
           </div>
         )

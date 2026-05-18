@@ -42,7 +42,7 @@ export function ExecutiveSummaryHero({ snapshot }: { snapshot: Snapshot }) {
 
   return (
     <section
-      className="relative overflow-hidden rounded-2xl"
+      className="relative flex h-full flex-col overflow-hidden rounded-2xl"
       style={{
         background: 'linear-gradient(135deg, #0a1f4a 0%, #0a3d8f 50%, #1d4ed8 100%)',
       }}
@@ -69,7 +69,7 @@ export function ExecutiveSummaryHero({ snapshot }: { snapshot: Snapshot }) {
         className="h-[3px]"
         style={{ background: 'linear-gradient(90deg, #f07a23 0%, #fbbf24 50%, #f07a23 100%)' }}
       />
-      <div className="relative p-5 md:p-7">
+      <div className="relative flex flex-1 flex-col p-5 md:p-7">
         {/* "YÖNETİCİ ÖZETİ" pill */}
         <motion.span
           initial={{ scale: 0.92, opacity: 0 }}
@@ -97,32 +97,36 @@ export function ExecutiveSummaryHero({ snapshot }: { snapshot: Snapshot }) {
           {summary}
         </motion.p>
 
-        {/* 3 stat row */}
+        {/* 3 stat row — mt-auto wrapper pushes block to bottom (matches chart card height) */}
         <motion.div
           initial={{ y: 10, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.42, delay: 0.18, ease: 'easeOut' }}
-          className="mt-6 grid grid-cols-3 gap-px overflow-hidden rounded-xl"
-          style={{ background: 'rgba(255,255,255,0.08)' }}
+          className="mt-auto pt-6"
         >
-          <HeroStat
-            icon={ChartLineData01Icon}
-            label="Son 12 Ay"
-            value={fmtTon(snapshot.totalQtyLast12)}
-          />
-          <HeroStat
-            icon={TradeUpIcon}
-            label="Aktivite"
-            value={activeMonths != null && totalMonths > 0
-              ? `${activeMonths}/${totalMonths} ay`
-              : '—'}
-          />
-          <HeroStat
-            icon={PercentSquareIcon}
-            label="Model Doğruluk"
-            value={accuracy != null ? `%${accuracy.toFixed(0)}` : '—'}
-            sub={snapshot.yoy != null ? `YoY ${fmtPct(snapshot.yoy)}` : undefined}
-          />
+          <div
+            className="grid grid-cols-3 gap-px overflow-hidden rounded-xl"
+            style={{ background: 'rgba(255,255,255,0.08)' }}
+          >
+            <HeroStat
+              icon={ChartLineData01Icon}
+              label="Son 12 Ay"
+              value={fmtTon(snapshot.totalQtyLast12)}
+            />
+            <HeroStat
+              icon={TradeUpIcon}
+              label="Aktivite"
+              value={activeMonths != null && totalMonths > 0
+                ? `${activeMonths}/${totalMonths} ay`
+                : '—'}
+            />
+            <HeroStat
+              icon={PercentSquareIcon}
+              label="Model Doğruluk"
+              value={accuracy != null ? `%${accuracy.toFixed(0)}` : '—'}
+              sub={snapshot.yoy != null ? `YoY ${fmtPct(snapshot.yoy)}` : undefined}
+            />
+          </div>
         </motion.div>
       </div>
     </section>
