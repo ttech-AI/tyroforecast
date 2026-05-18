@@ -69,13 +69,13 @@ export function ExecutiveSummaryHero({ snapshot }: { snapshot: Snapshot }) {
         className="h-[3px]"
         style={{ background: 'linear-gradient(90deg, #f07a23 0%, #fbbf24 50%, #f07a23 100%)' }}
       />
-      <div className="relative flex flex-1 flex-col p-5 md:p-7">
-        {/* "YÖNETİCİ ÖZETİ" pill */}
+      <div className="relative flex flex-1 flex-col p-4 md:p-5">
+        {/* "YÖNETİCİ ÖZETİ" pill — self-start sayesinde içerik genişliği, full-stretch yok */}
         <motion.span
           initial={{ scale: 0.92, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
-          className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wider"
+          className="inline-flex w-fit items-center gap-1.5 self-start rounded-md px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wider"
           style={{
             background: 'rgba(240,122,35,0.18)',
             color: '#fcd34d',
@@ -92,7 +92,7 @@ export function ExecutiveSummaryHero({ snapshot }: { snapshot: Snapshot }) {
           initial={{ y: 6, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.42, delay: 0.08, ease: 'easeOut' }}
-          className="mt-4 text-[15px] font-medium leading-[1.6] text-white md:text-[17px] md:leading-[1.55]"
+          className="mt-3 text-[14px] font-medium leading-[1.55] text-white md:text-[15.5px] md:leading-[1.5]"
         >
           {summary}
         </motion.p>
@@ -102,7 +102,7 @@ export function ExecutiveSummaryHero({ snapshot }: { snapshot: Snapshot }) {
           initial={{ y: 10, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.42, delay: 0.18, ease: 'easeOut' }}
-          className="mt-auto pt-6"
+          className="mt-auto pt-4"
         >
           <div
             className="grid grid-cols-3 gap-px overflow-hidden rounded-xl"
@@ -139,18 +139,18 @@ export function ExecutiveSummaryHero({ snapshot }: { snapshot: Snapshot }) {
 function HeroStat({ icon, label, value, sub }: { icon: any; label: string; value: string; sub?: string }) {
   return (
     <div
-      className="px-3 py-3.5 transition-colors hover:bg-white/[0.04] md:px-5 md:py-4"
+      className="px-3 py-2.5 transition-colors hover:bg-white/[0.04] md:px-4 md:py-3"
       style={{ background: 'rgba(13,30,68,0.45)' }}
     >
       <div className="flex items-center gap-1.5 text-[9.5px] font-extrabold uppercase tracking-wider text-amber-200/85">
         <HugeiconsIcon icon={icon} size={11} strokeWidth={2.2} />
         {label}
       </div>
-      <div className="mt-1.5 text-[18px] font-extrabold leading-none tracking-tight tabular-nums text-white md:text-[22px]">
+      <div className="mt-1 text-[16px] font-extrabold leading-none tracking-tight tabular-nums text-white md:text-[19px]">
         {value}
       </div>
       {sub && (
-        <div className="mt-1 text-[10px] font-medium text-slate-300">{sub}</div>
+        <div className="mt-0.5 text-[9.5px] font-medium text-slate-300">{sub}</div>
       )}
     </div>
   )

@@ -386,13 +386,13 @@ export function ForecastMiniChart({ snapshot }: { snapshot: Snapshot }) {
       </header>
 
       {/* Chart — flex-1 ile hero kartının yüksekliğine kadar uzar (taşma yok) */}
-      <div className="flex min-h-0 flex-1 flex-col px-3 py-3 md:px-4 md:py-4">
+      <div className="flex min-h-0 flex-1 flex-col px-3 py-2 md:px-4 md:py-3">
         <svg
           ref={svgRef}
           viewBox={`0 0 ${W} ${H}`}
           preserveAspectRatio="none"
           className="block w-full flex-1"
-          style={{ minHeight: 160 }}
+          style={{ minHeight: 120 }}
           onMouseMove={onMove}
           onMouseLeave={() => setHover(null)}
           aria-label="Forecast chart"
@@ -464,22 +464,6 @@ export function ForecastMiniChart({ snapshot }: { snapshot: Snapshot }) {
             )
           })}
         </svg>
-
-        {/* Legend */}
-        <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 px-2 text-[10.5px] text-muted-foreground">
-          <span className="inline-flex items-center gap-1.5">
-            <span className="h-[3px] w-4 rounded-full" style={{ background: '#0a3d8f' }} />
-            <span>Geçmiş 12 ay</span>
-          </span>
-          <span className="inline-flex items-center gap-1.5">
-            <span className="h-[3px] w-4 rounded-full" style={{ background: 'repeating-linear-gradient(90deg, #f07a23 0 4px, transparent 4px 7px)' }} />
-            <span>Tahmin ({snapshot.horizon} ay)</span>
-          </span>
-          <span className="inline-flex items-center gap-1.5">
-            <span className="h-[10px] w-4 rounded" style={{ background: 'rgba(240,122,35,0.10)' }} />
-            <span>Güven aralığı</span>
-          </span>
-        </div>
       </div>
 
       {/* Hover tooltip */}

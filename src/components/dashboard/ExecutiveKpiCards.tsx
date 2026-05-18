@@ -7,10 +7,10 @@
 
 import { HugeiconsIcon } from '@hugeicons/react'
 import {
-  PackageIcon,
+  PackageAddIcon,
   DashboardSquareAddIcon,
-  UserAccountIcon,
-  ChartLineData01Icon,
+  UserGroup03Icon,
+  Archive02Icon,
 } from '@hugeicons/core-free-icons'
 import { fmtNumber, fmtTon } from '../../lib/forecast/format.js'
 import { useCountUp } from '../../lib/anim/useCountUp.js'
@@ -77,7 +77,7 @@ export function ExecutiveKpiCards({ snapshot }: { snapshot: Snapshot }) {
       />
       <KpiCard
         accent="#f07a23"
-        icon={<HugeiconsIcon icon={ChartLineData01Icon} size={18} strokeWidth={1.9} color="#f07a23" />}
+        icon={<HugeiconsIcon icon={Archive02Icon} size={18} strokeWidth={1.9} color="#f07a23" />}
         label="Toplam Sipariş"
         valueNumber={snapshot.recordCount}
         valueFmt={(n) => fmtNumber(Math.round(n))}
@@ -85,7 +85,7 @@ export function ExecutiveKpiCards({ snapshot }: { snapshot: Snapshot }) {
       />
       <KpiCard
         accent="#10b981"
-        icon={<HugeiconsIcon icon={UserAccountIcon} size={18} strokeWidth={1.9} color="#10b981" />}
+        icon={<HugeiconsIcon icon={UserGroup03Icon} size={18} strokeWidth={1.9} color="#10b981" />}
         label="Toplam Müşteri"
         valueNumber={snapshot.uniqueCustomers}
         valueFmt={(n) => fmtNumber(Math.round(n))}
@@ -93,7 +93,7 @@ export function ExecutiveKpiCards({ snapshot }: { snapshot: Snapshot }) {
       />
       <KpiCard
         accent="#8b5cf6"
-        icon={<HugeiconsIcon icon={PackageIcon} size={18} strokeWidth={1.9} color="#8b5cf6" />}
+        icon={<HugeiconsIcon icon={PackageAddIcon} size={18} strokeWidth={1.9} color="#8b5cf6" />}
         label="Toplam Ürün"
         valueNumber={snapshot.uniqueProducts}
         valueFmt={(n) => fmtNumber(Math.round(n))}

@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import {
   Search,
-  Clock,
   LogOut,
   UserRound,
   Database,
@@ -12,6 +11,7 @@ import { HugeiconsIcon } from '@hugeicons/react'
 import {
   Home01Icon,
   AiBrain04Icon,
+  Calendar03Icon,
 } from '@hugeicons/core-free-icons'
 import { useMsal } from '../lib/forecast/msalContext.jsx'
 
@@ -270,33 +270,62 @@ function DateTimeDisplay() {
     }
   }, [])
 
-  // Friday, 17 May 2026 → Cuma, 17 Mayıs 2026
-  const fullDate = useMemo(
-    () =>
-      new Intl.DateTimeFormat('tr-TR', {
-        weekday: 'long',
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric',
-      }).format(now),
-    [now],
-  )
-  const time = useMemo(
-    () =>
-      new Intl.DateTimeFormat('tr-TR', {
-        hour: '2-digit',
-        minute: '2-digit',
-      }).format(now),
-    [now],
-  )
+  // Premium parçalı format: weekday · day month · time (tabular)
+  const parts = useMemo(() => {
+    const weekday = new Intl.DateTimeFormat('tr-TR', { weekday: 'long' }).format(now)
+    const day = new Intl.DateTimeFormat('tr-TR', { day: 'numeric' }).format(now)
+    const month = new Intl.DateTimeFormat('tr-TR', { month: 'long' }).format(now)
+    const year = new Intl.DateTimeFormat('tr-TR', { year: 'numeric' }).format(now)
+    const time = new Intl.DateTimeFormat('tr-TR', {
+      hour: '2-digit',
+      minute: '2-digit',
+    }).format(now)
+    return { weekday, day, month, year, time }
+  }, [now])
 
   return (
-    <div className="hidden items-center gap-2 text-[12.5px] text-foreground/75 md:flex">
-      <Clock className="h-4 w-4" strokeWidth={1.8} />
-      <span className="hidden lg:inline">
-        {fullDate} — {time}
+    <div
+      className="hidden items-center gap-2.5 rounded-xl border border-border/60 bg-card/80 px-3 py-1.5 shadow-[0_1px_2px_rgba(15,23,42,0.04),inset_0_1px_0_rgba(255,255,255,0.6)] backdrop-blur md:flex"
+      title={`${parts.weekday}, ${parts.day} ${parts.month} ${parts.year}`}
+    >
+      {/* Calendar icon — accent stroke-bordered mini kutu */}
+      <span
+        className="grid h-7 w-7 place-items-center rounded-lg border-[1.5px]"
+        style={{
+          borderColor: 'rgba(10,61,143,0.22)',
+          background: 'linear-gradient(135deg, rgba(10,61,143,0.05), rgba(240,122,35,0.04))',
+        }}
+      >
+        <HugeiconsIcon icon={Calendar03Icon} size={14} strokeWidth={1.9} color="#0a3d8f" />
       </span>
-      <span className="lg:hidden">{time}</span>
+
+      {/* Date + time stack */}
+      <div className="hidden flex-col leading-tight lg:flex">
+        <span className="text-[9.5px] font-extrabold uppercase tracking-wider text-muted-foreground">
+          {parts.weekday}
+        </span>
+        <span className="flex items-baseline gap-1.5 text-[12.5px] font-bold tabular-nums text-foreground">
+          <span>{parts.day} {parts.month}</span>
+          <span className="h-3 w-px bg-border/80" aria-hidden="true" />
+          <span
+            className="font-extrabold tracking-tight"
+            style={{
+              backgroundImage: 'linear-gradient(135deg, #0a3d8f, #3b82f6 60%, #f07a23)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+              color: 'transparent',
+            }}
+          >
+            {parts.time}
+          </span>
+        </span>
+      </div>
+
+      {/* Mobile/medium fallback — sadece saat */}
+      <span className="text-[12.5px] font-bold tabular-nums text-foreground lg:hidden">
+        {parts.time}
+      </span>
     </div>
   )
 }
@@ -351,7 +380,7 @@ function ProfileMenu() {
         aria-haspopup="menu"
         aria-expanded={open}
         aria-label="Profil menüsü"
-        className="grid h-9 w-9 place-items-center rounded-full border border-border text-[13px] font-semibold text-white shadow-sm transition hover:scale-[1.04] sm:h-10 sm:w-10"
+        className="grid h-8 w-8 place-items-center rounded-full text-[12.5px] font-bold text-white shadow-[0_2px_8px_-2px_rgba(240,122,35,0.45),inset_0_1px_0_rgba(255,255,255,0.30)] ring-2 ring-orange-300/40 ring-offset-2 ring-offset-shell transition-all duration-200 hover:scale-[1.05] hover:ring-orange-400/60 sm:h-9 sm:w-9"
         style={{
           backgroundImage:
             'linear-gradient(135deg, #f4c08a 0%, #d18454 45%, #8b5a3c 100%)',
