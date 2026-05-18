@@ -69,6 +69,7 @@ import {
 } from '../lib/forecast/salesForecast.js'
 import { DEFAULT_SCENARIO } from '../lib/forecast/salesSimulation.js'
 import { buildHomeSnapshot, writeHomeSnapshot } from '../lib/forecast/homeSnapshot.js'
+import { readFcstCache, writeFcstCache, readFilterState, writeFilterState } from '../lib/forecast/fcstCache.js'
 
 // Cache key prefix — bump when payload shape changes
 // v3: mergeCompanyAliases artık name'i preserve ediyor — eski v2 cache'inde
@@ -101,12 +102,28 @@ export function SalesForecastPage() {
   const [fcstTraderListLoading, setFcstTraderListLoading] = useState(false)
 
   // ─────────────────────────────────────────────────────────────────────────
-  // Filter inputs
+  // Filter inputs — son seçim localStorage'tan restore edilir (lazy init)
   // ─────────────────────────────────────────────────────────────────────────
-  const [fcstTrader, setFcstTrader] = useState([])
-  const [fcstAnaTrader, setFcstAnaTrader] = useState([])
-  const [fcstHorizon, setFcstHorizon] = useState(12)
-  const [fcstMetric, setFcstMetric] = useState('qty')
+  const [fcstTrader, setFcstTrader] = useState(() => {
+    const s = readFilterState(); return Array.isArray(s?.fcstTrader) ? s.fcstTrader : []
+  })
+  const [fcstAnaTrader, setFcstAnaTrader] = useState(() => {
+    const s = readFilterState(); return Array.isArray(s?.fcstAnaTrader) ? s.fcstAnaTrader : []
+  })
+  const [fcstHorizon, setFcstHorizon] = useState(() => {
+    const s = readFilterState(); return [3, 6, 12].includes(s?.fcstHorizon) ? s.fcstHorizon : 12
+  })
+  const [fcstMetric, setFcstMetric] = useState(() => {
+    const s = readFilterState(); return s?.fcstMetric === 'value' ? 'value' : 'qty'
+  })
+
+  // Filter state'ini her değişiklikte localStorage'a yaz (debounce: 400ms)
+  useEffect(() => {
+    const t = setTimeout(() => {
+      writeFilterState({ fcstTrader, fcstAnaTrader, fcstHorizon, fcstMetric })
+    }, 400)
+    return () => clearTimeout(t)
+  }, [fcstTrader, fcstAnaTrader, fcstHorizon, fcstMetric])
 
   // ─────────────────────────────────────────────────────────────────────────
   // Forecast result + status
@@ -227,20 +244,17 @@ export function SalesForecastPage() {
       // Anasayfa KPI'ları için unique count'lar (her path'te set edilir)
       let uniqueProducts = 0, uniqueCustomers = 0, uniqueCompanies = 0
 
-      // ─── Cache check ───
+      // ─── Cache check (TTL yok — "tutabildiği kadar" stratejisi) ───
       try {
-        const cached = localStorage.getItem(cacheKey)
-        if (cached) {
-          const p = JSON.parse(cached)
-          if (p && p.fetchedAt && Date.now() - p.fetchedAt < 86400000) {
-            aggMap = p.aggMap; profile = p.profile; valueAvailable = p.valueAvailable
-            recordCount = p.recordCount || 0; fromCache = true; fetchMode = p.fetchMode || 'aggregate'
-            itemmonthRows = p.itemmonthRows || null
-            uniqueProducts = p.uniqueProducts || 0
-            uniqueCustomers = p.uniqueCustomers || 0
-            uniqueCompanies = p.uniqueCompanies || 0
-            setFcstStepData((d) => ({ ...d, fetched: { count: recordCount, fromCache: true, mode: fetchMode } }))
-          }
+        const p = readFcstCache(cacheKey)
+        if (p && p.fetchedAt) {
+          aggMap = p.aggMap; profile = p.profile; valueAvailable = p.valueAvailable
+          recordCount = p.recordCount || 0; fromCache = true; fetchMode = p.fetchMode || 'aggregate'
+          itemmonthRows = p.itemmonthRows || null
+          uniqueProducts = p.uniqueProducts || 0
+          uniqueCustomers = p.uniqueCustomers || 0
+          uniqueCompanies = p.uniqueCompanies || 0
+          setFcstStepData((d) => ({ ...d, fetched: { count: recordCount, fromCache: true, mode: fetchMode } }))
         }
       } catch (_) { /* cache parse */ }
 
@@ -299,12 +313,11 @@ export function SalesForecastPage() {
             })
           }
         }
-        try {
-          localStorage.setItem(cacheKey, JSON.stringify({
-            fetchedAt: Date.now(), aggMap, profile, valueAvailable, recordCount, fetchMode, itemmonthRows,
-            uniqueProducts, uniqueCustomers, uniqueCompanies,
-          }))
-        } catch (_) { /* quota — silent */ }
+        // LRU eviction + quota retry → helper içinde
+        writeFcstCache(cacheKey, {
+          fetchedAt: Date.now(), aggMap, profile, valueAvailable, recordCount, fetchMode, itemmonthRows,
+          uniqueProducts, uniqueCustomers, uniqueCompanies,
+        })
       }
 
       // ─── Step 2: Aggregate ───
