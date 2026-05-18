@@ -10,6 +10,11 @@ type NavItem = {
   Icon: ComponentType<{ className?: string; strokeWidth?: number }>
 }
 
+type NavGroup = {
+  title: string
+  items: NavItem[]
+}
+
 function HomeHugeIcon({
   className,
   strokeWidth = 1.8,
@@ -42,14 +47,29 @@ function ForecastHugeIcon({
   )
 }
 
-const TOP_ITEMS: NavItem[] = [
-  { key: 'home', label: 'Ana Sayfa', Icon: HomeHugeIcon },
-  { key: 'forecast', label: 'Satış Tahmini', Icon: ForecastHugeIcon },
-  { key: 'data', label: 'Veri Yönetimi', Icon: Database },
+const TOP_GROUPS: NavGroup[] = [
+  {
+    title: 'Pano',
+    items: [
+      { key: 'home', label: 'Ana Sayfa', Icon: HomeHugeIcon },
+    ],
+  },
+  {
+    title: 'Operasyon',
+    items: [
+      { key: 'forecast', label: 'Satış Tahmini', Icon: ForecastHugeIcon },
+      { key: 'data', label: 'Veri Yönetimi', Icon: Database },
+    ],
+  },
 ]
 
-const BOTTOM_ITEMS: NavItem[] = [
-  { key: 'settings', label: 'Ayarlar', Icon: Settings },
+const BOTTOM_GROUPS: NavGroup[] = [
+  {
+    title: 'Sistem',
+    items: [
+      { key: 'settings', label: 'Ayarlar', Icon: Settings },
+    ],
+  },
 ]
 
 type SidebarProps = {
@@ -69,30 +89,68 @@ export function Sidebar({ activePage, onPageChange }: SidebarProps) {
         <TyroWordmark className="overflow-hidden whitespace-nowrap !text-[16px] opacity-0 transition-opacity duration-150 lg:group-hover:opacity-100" />
       </div>
 
-      {/* Top items */}
-      <div className="flex flex-col gap-0.5">
-        {TOP_ITEMS.map((item) => (
-          <SidebarItem
-            key={item.key}
-            item={item}
-            isActive={item.key === activePage}
-            onSelect={() => onPageChange(item.key)}
+      {/* Top groups */}
+      <div className="flex flex-col gap-3">
+        {TOP_GROUPS.map((group) => (
+          <NavGroupBlock
+            key={group.title}
+            group={group}
+            activePage={activePage}
+            onPageChange={onPageChange}
           />
         ))}
       </div>
 
-      {/* Bottom items (Settings) */}
-      <div className="mt-auto flex flex-col gap-0.5">
-        {BOTTOM_ITEMS.map((item) => (
-          <SidebarItem
-            key={item.key}
-            item={item}
-            isActive={item.key === activePage}
-            onSelect={() => onPageChange(item.key)}
+      {/* Bottom groups */}
+      <div className="mt-auto flex flex-col gap-3">
+        {BOTTOM_GROUPS.map((group) => (
+          <NavGroupBlock
+            key={group.title}
+            group={group}
+            activePage={activePage}
+            onPageChange={onPageChange}
           />
         ))}
       </div>
     </nav>
+  )
+}
+
+function NavGroupBlock({
+  group,
+  activePage,
+  onPageChange,
+}: {
+  group: NavGroup
+  activePage: string
+  onPageChange: (key: string) => void
+}) {
+  return (
+    <div className="flex flex-col gap-0.5">
+      {/* Group label — expand'da fade-in, collapse'da görünmez ama yer kaplar */}
+      <div className="relative h-3 px-2.5">
+        {/* Collapse durumunda merkez minik tire — gruplar arası görsel ipucu */}
+        <span
+          aria-hidden="true"
+          className="absolute left-1/2 top-1/2 h-px w-3 -translate-x-1/2 -translate-y-1/2 bg-foreground/15 transition-opacity duration-150 lg:group-hover:opacity-0"
+        />
+        {/* Expand'da grup adı */}
+        <span
+          className="absolute inset-0 flex items-center px-2.5 text-[9.5px] font-extrabold uppercase tracking-[0.14em] text-foreground/35 opacity-0 transition-opacity duration-150 lg:group-hover:opacity-100"
+        >
+          {group.title}
+        </span>
+      </div>
+      {/* Items */}
+      {group.items.map((item) => (
+        <SidebarItem
+          key={item.key}
+          item={item}
+          isActive={item.key === activePage}
+          onSelect={() => onPageChange(item.key)}
+        />
+      ))}
+    </div>
   )
 }
 
