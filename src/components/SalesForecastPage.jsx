@@ -68,6 +68,7 @@ import {
   FORECAST_MODELS,
 } from '../lib/forecast/salesForecast.js'
 import { DEFAULT_SCENARIO } from '../lib/forecast/salesSimulation.js'
+import { buildHomeSnapshot, writeHomeSnapshot } from '../lib/forecast/homeSnapshot.js'
 
 // Cache key prefix — bump when payload shape changes
 // v3: mergeCompanyAliases artık name'i preserve ediyor — eski v2 cache'inde
@@ -223,6 +224,8 @@ export function SalesForecastPage() {
 
       let aggMap = null, profile = null, valueAvailable = false, fromCache = false, recordCount = 0, fetchMode = 'aggregate'
       let itemmonthRows = null
+      // Anasayfa KPI'ları için unique count'lar (her path'te set edilir)
+      let uniqueProducts = 0, uniqueCustomers = 0, uniqueCompanies = 0
 
       // ─── Cache check ───
       try {
@@ -233,6 +236,9 @@ export function SalesForecastPage() {
             aggMap = p.aggMap; profile = p.profile; valueAvailable = p.valueAvailable
             recordCount = p.recordCount || 0; fromCache = true; fetchMode = p.fetchMode || 'aggregate'
             itemmonthRows = p.itemmonthRows || null
+            uniqueProducts = p.uniqueProducts || 0
+            uniqueCustomers = p.uniqueCustomers || 0
+            uniqueCompanies = p.uniqueCompanies || 0
             setFcstStepData((d) => ({ ...d, fetched: { count: recordCount, fromCache: true, mode: fetchMode } }))
           }
         }
@@ -248,6 +254,10 @@ export function SalesForecastPage() {
           aggMap = aggregateFromServer(agg.monthly)
           profile = buildTraderProfileFromAggregates(aggMap, agg.products, agg.accounts, agg.companies, gGrp)
           recordCount = agg.monthly.length
+          // Anasayfa KPI'ları için: aggregate path tüm ürün/müşteri/şirket listesini döner
+          uniqueProducts = agg.products?.length || 0
+          uniqueCustomers = agg.accounts?.length || 0
+          uniqueCompanies = agg.companies?.length || 0
           itemmonthRows = agg.itemmonth || []
           fetchMode = 'aggregate'
           valueAvailable = false
@@ -263,6 +273,18 @@ export function SalesForecastPage() {
           aggMap = aggregateMonthly(fetchRes.records, { valueField: fetchRes.valueField })
           profile = buildTraderProfile(fetchRes.records, gGrp, aggMap)
           valueAvailable = !!fetchRes.valueField
+          // Anasayfa KPI'ları için: raw fallback'te Set ile tekil sayım
+          {
+            const pSet = new Set(), aSet = new Set(), cSet = new Set()
+            for (const r of fetchRes.records) {
+              if (r.mserp_productid) pSet.add(String(r.mserp_productid).trim())
+              if (r.mserp_toaccountid) aSet.add(String(r.mserp_toaccountid).trim())
+              if (r.mserp_salesdataareaid) cSet.add(String(r.mserp_salesdataareaid).trim().toUpperCase())
+            }
+            uniqueProducts = pSet.size
+            uniqueCustomers = aSet.size
+            uniqueCompanies = cSet.size
+          }
           itemmonthRows = []
           for (const r of fetchRes.records) {
             const pid = String(r.mserp_productid || '').trim()
@@ -278,7 +300,10 @@ export function SalesForecastPage() {
           }
         }
         try {
-          localStorage.setItem(cacheKey, JSON.stringify({ fetchedAt: Date.now(), aggMap, profile, valueAvailable, recordCount, fetchMode, itemmonthRows }))
+          localStorage.setItem(cacheKey, JSON.stringify({
+            fetchedAt: Date.now(), aggMap, profile, valueAvailable, recordCount, fetchMode, itemmonthRows,
+            uniqueProducts, uniqueCustomers, uniqueCompanies,
+          }))
         } catch (_) { /* quota — silent */ }
       }
 
@@ -347,15 +372,24 @@ export function SalesForecastPage() {
         return t?.name || null
       })
 
-      setFcstResult({
+      const nextResult = {
         series, profile, fitQty, fitValue, valueAvailable,
         traderCode: displayCodes.length === 1 ? displayCodes[0] : displayCodes.join('+'),
         traderCodes: fetchCodes, displayCodes, displayNames,
         resolvedSubCount: fetchCodes.length, subTraders,
         filterScope: useAnaTrader ? 'ana' : 'trader',
         horizon: fcstHorizon, fetchedAt: Date.now(), fromCache, recordCount,
+        uniqueProducts, uniqueCustomers, uniqueCompanies,
         itemForecasts, itemLongTail, itemReconcile,
-      })
+      }
+      setFcstResult(nextResult)
+      // Anasayfa snapshot — executive dashboard'ı bu trader sonucuyla doldur
+      try {
+        const snap = buildHomeSnapshot({ result: nextResult, uniqueProducts, uniqueCustomers, uniqueCompanies })
+        writeHomeSnapshot(snap)
+      } catch (snapErr) {
+        console.warn('[HomeSnapshot] write failed', snapErr)
+      }
       setFcstChartView('total')
       setFcstActiveModel(null)
       await wait(300)

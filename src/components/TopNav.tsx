@@ -24,12 +24,12 @@ import {
 } from '@hugeicons/core-free-icons'
 import { useMsal } from '../lib/forecast/msalContext.jsx'
 
-// ─── Page titles ────────────────────────────────────────────────────────────
-const PAGE_TITLES: Record<string, string> = {
-  home: 'Ana Sayfa',
-  forecast: 'Satış Tahmini',
-  data: 'Veri Yönetimi',
-  settings: 'Ayarlar',
+// ─── Page meta (başlık + gradient subtitle) ─────────────────────────────────
+const PAGE_META: Record<string, { title: string; subtitle: string }> = {
+  home:     { title: 'Ana Sayfa',     subtitle: 'Yönetici Özeti · Tahmin Sonuçları' },
+  forecast: { title: 'Satış Tahmini', subtitle: 'AI destekli zaman serisi modelleri' },
+  data:     { title: 'Veri Yönetimi', subtitle: 'Trader ve ürün katalogları' },
+  settings: { title: 'Ayarlar',       subtitle: 'Sistem ve hesap tercihleri' },
 }
 
 const NAV_OPTIONS: Array<{
@@ -53,11 +53,28 @@ type TopNavProps = {
 }
 
 export function TopNav({ activePage, onNavigate }: TopNavProps) {
+  const meta = PAGE_META[activePage] || { title: 'Overview', subtitle: '' }
   return (
     <header className="flex items-center gap-3 sm:gap-4 lg:gap-6">
-      <h1 className="shrink-0 text-[20px] font-semibold leading-none tracking-tight text-foreground md:text-[22px]">
-        {PAGE_TITLES[activePage] || 'Overview'}
-      </h1>
+      <div className="flex shrink-0 flex-col gap-1">
+        <h1 className="text-[17px] font-semibold leading-none tracking-tight text-foreground md:text-[19px]">
+          {meta.title}
+        </h1>
+        {meta.subtitle && (
+          <p
+            className="text-[10.5px] font-semibold leading-none tracking-wide"
+            style={{
+              backgroundImage: 'linear-gradient(90deg, #0a3d8f 0%, #3b82f6 50%, #f07a23 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+              color: 'transparent',
+            }}
+          >
+            {meta.subtitle}
+          </p>
+        )}
+      </div>
 
       <div className="flex flex-1 items-center justify-center gap-2">
         <SearchBar onNavigate={onNavigate} />
@@ -121,7 +138,7 @@ function SearchBar({ onNavigate }: { onNavigate: (k: string) => void }) {
 
   return (
     <div ref={wrapRef} className="relative flex w-full max-w-md">
-      <label className="flex w-full items-center gap-2.5 rounded-full border border-border bg-card px-3.5 py-2 transition focus-within:border-foreground/30 sm:px-4 sm:py-2.5">
+      <label className="flex w-full items-center gap-2.5 rounded-full border border-border/70 bg-card px-3.5 py-2 transition-all duration-150 hover:border-border focus-within:border-primary/30 focus-within:shadow-[0_0_0_4px_rgba(10,61,143,0.08)] sm:px-4 sm:py-2.5">
         <Search className="h-4 w-4 shrink-0 text-muted-foreground" strokeWidth={1.8} />
         <input
           ref={inputRef}

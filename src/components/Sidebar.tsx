@@ -43,9 +43,9 @@ function ForecastHugeIcon({
 }
 
 const TOP_ITEMS: NavItem[] = [
-  { key: 'home', label: 'Ana sayfa', Icon: HomeHugeIcon },
+  { key: 'home', label: 'Ana Sayfa', Icon: HomeHugeIcon },
   { key: 'forecast', label: 'Satış Tahmini', Icon: ForecastHugeIcon },
-  { key: 'data', label: 'Veri yönetimi', Icon: Database },
+  { key: 'data', label: 'Veri Yönetimi', Icon: Database },
 ]
 
 const BOTTOM_ITEMS: NavItem[] = [

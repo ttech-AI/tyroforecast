@@ -110,6 +110,16 @@ body {
   }
 }
 
+/* Dashboard mikro-etkileşim keyframes */
+@keyframes shimmer-bar {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(400%); }
+}
+@keyframes kpi-pulse {
+  0%, 100% { opacity: 0.6; transform: translateY(0); }
+  50%      { opacity: 1;   transform: translateY(-1px); }
+}
+
 /* Diagonal hatch utilities */
 .hatch-light {
   background-image: repeating-linear-gradient(

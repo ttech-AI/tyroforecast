@@ -2,14 +2,16 @@ import { useState } from 'react'
 import { Login } from './components/Login'
 import { TopNav } from './components/TopNav'
 import { Sidebar } from './components/Sidebar'
-import { OverviewHeader } from './components/OverviewHeader'
-import { ReportsCard } from './components/ReportsCard'
-import { OrderStatusCard } from './components/OrderStatusCard'
-import { CustomersCard } from './components/CustomersCard'
-import { OccupationCard } from './components/OccupationCard'
-import { WeeklySummaryCard } from './components/WeeklySummaryCard'
+import { ExecutiveKpiCards } from './components/dashboard/ExecutiveKpiCards'
+import { ExecutiveSummaryHero } from './components/dashboard/ExecutiveSummaryHero'
+import { ForecastMiniChart } from './components/dashboard/ForecastMiniChart'
+import { TopBreakdownCard } from './components/dashboard/TopBreakdownCard'
+import { SeasonalActivityStrip } from './components/dashboard/SeasonalActivityStrip'
+import { EmptyDashboard } from './components/dashboard/EmptyDashboard'
+import { DeliveryTruck01Icon, PackageIcon, FactoryIcon } from '@hugeicons/core-free-icons'
 import { SalesForecastPage } from './components/SalesForecastPage.jsx'
 import { useMsal } from './lib/forecast/msalContext.jsx'
+import { useHomeSnapshot } from './lib/forecast/homeSnapshot.js'
 
 type PageKey = 'home' | 'forecast' | 'data' | 'settings'
 
@@ -53,7 +55,9 @@ function App() {
           <TopNav activePage={activePage} onNavigate={(k) => setActivePage(k as PageKey)} />
 
           <main className="mt-5 lg:mt-7">
-            {activePage === 'home' && <DashboardHome />}
+            {activePage === 'home' && (
+              <DashboardHome onGoToForecast={() => setActivePage('forecast')} />
+            )}
             {activePage === 'forecast' && <SalesForecastPage />}
             {activePage === 'data' && <ComingSoon title="Veri yönetimi" />}
             {activePage === 'settings' && <ComingSoon title="Ayarlar" />}
@@ -64,22 +68,55 @@ function App() {
   )
 }
 
-function DashboardHome() {
+function DashboardHome({ onGoToForecast }: { onGoToForecast: () => void }) {
+  const snapshot = useHomeSnapshot()
+
+  // Snapshot yok → boş durum + Satış Tahmini CTA
+  if (!snapshot) {
+    return <EmptyDashboard onGoToForecast={onGoToForecast} />
+  }
+
   return (
-    <>
-      <OverviewHeader />
+    <div className="space-y-4 md:space-y-5">
+      {/* Row 1 — 4 üst KPI */}
+      <ExecutiveKpiCards snapshot={snapshot} />
 
-      <div className="mt-5 grid grid-cols-1 gap-3 md:gap-4 lg:mt-7 lg:grid-cols-3 lg:gap-5">
-        <ReportsCard className="lg:col-span-2" />
-        <OrderStatusCard />
+      {/* Row 2 — Executive Summary hero (2/3) + Forecast Mini Chart (1/3) */}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3 lg:gap-5">
+        <div className="lg:col-span-2">
+          <ExecutiveSummaryHero snapshot={snapshot} />
+        </div>
+        <ForecastMiniChart snapshot={snapshot} />
       </div>
 
-      <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 md:gap-4 lg:mt-5 lg:grid-cols-3 lg:gap-5">
-        <CustomersCard />
-        <OccupationCard />
-        <WeeklySummaryCard className="sm:col-span-2 lg:col-span-1" />
+      {/* Row 3 — 3 top breakdown kartı (müşteri / ürün / şirket) */}
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 lg:gap-5">
+        <TopBreakdownCard
+          icon={DeliveryTruck01Icon}
+          accent="#8b5cf6"
+          title="Top Müşteriler"
+          subtitle={`${snapshot.topCustomers.length} müşteri · hacim sırasına göre`}
+          items={snapshot.topCustomers}
+        />
+        <TopBreakdownCard
+          icon={PackageIcon}
+          accent="#f07a23"
+          title="Top Ürünler"
+          subtitle={`${snapshot.topProducts.length} ürün · toplam paydan`}
+          items={snapshot.topProducts}
+        />
+        <TopBreakdownCard
+          icon={FactoryIcon}
+          accent="#0a3d8f"
+          title="Top Şirketler"
+          subtitle={`${snapshot.topCompanies.length} grup · origin payı`}
+          items={snapshot.topCompanies}
+        />
       </div>
-    </>
+
+      {/* Row 4 — Mevsim Profili + Aktivite Gauge */}
+      <SeasonalActivityStrip snapshot={snapshot} />
+    </div>
   )
 }
 
