@@ -29,8 +29,9 @@
   /* Layout tiers:
        --page-bg  → outer app background (soft warm-neutral, around panels)
        --shell-bg → sidebar & main shell (lighter, near-white)
-       --card     → cards inside the main shell (pure white per Clay) */
-  --page-bg: 30 6% 94%;
+       --card     → cards inside the main shell (pure white per Clay)
+     Page-bg lightness 94 → 97: daha hafif, gözü yormayan açık warm-neutral. */
+  --page-bg: 30 4% 97%;
   --shell-bg: 0 0% 99.5%;
 }
 
