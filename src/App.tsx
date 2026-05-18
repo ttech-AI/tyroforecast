@@ -14,12 +14,14 @@ import { SettingsPage } from './components/SettingsPage'
 import { ComingSoonPage } from './components/ComingSoonPage'
 import { useMsal } from './lib/forecast/msalContext.jsx'
 import { useHomeSnapshot } from './lib/forecast/homeSnapshot.js'
+import { useSidebarPin } from './lib/forecast/useSidebarPin.js'
 
 type PageKey = 'home' | 'forecast' | 'data' | 'settings'
 
 function App() {
   const { ready, account } = useMsal()
   const [activePage, setActivePage] = useState<PageKey>('home')
+  const [pinned, togglePin] = useSidebarPin() as [boolean, () => void]
 
   // MSAL still bootstrapping — show a thin loader to avoid auth flicker
   if (!ready) {
@@ -35,24 +37,34 @@ function App() {
     return <Login />
   }
 
+  // ── Sidebar width/main margin classes — pinned ise her zaman 220px, değilse hover ──
+  const sidebarInnerCls = pinned
+    ? 'flex h-full w-[60px] flex-col overflow-hidden rounded-xl border border-border bg-shell px-2 py-3 shadow-sm sm:w-[64px] sm:rounded-2xl sm:px-2.5 sm:py-5 lg:w-[220px] lg:py-6 lg:shadow-lg'
+    : 'flex h-full w-[60px] flex-col overflow-hidden rounded-xl border border-border bg-shell px-2 py-3 shadow-sm transition-[width] duration-300 ease-out sm:w-[64px] sm:rounded-2xl sm:px-2.5 sm:py-5 lg:py-6 lg:hover:w-[220px] lg:hover:shadow-lg'
+
+  const mainMarginCls = pinned
+    ? 'ml-[68px] sm:ml-[76px] lg:ml-[236px]'
+    : 'ml-[68px] transition-[margin] duration-300 ease-out sm:ml-[76px] lg:ml-[80px] lg:peer-hover:ml-[236px]'
+
   return (
     <div className="min-h-screen bg-page p-2 sm:p-3 lg:p-4">
-      {/* Fixed sidebar — always visible, expands on hover (lg+) */}
+      {/* Fixed sidebar — always visible, expands on hover (lg+) or pin ile sabit */}
       <aside
         className="peer group fixed bottom-2 left-2 top-2 z-30 sm:bottom-3 sm:left-3 sm:top-3 lg:bottom-4 lg:left-4 lg:top-4"
+        data-pinned={pinned ? 'true' : 'false'}
       >
-        <div
-          className="flex h-full w-[60px] flex-col overflow-hidden rounded-xl border border-border bg-shell px-2 py-3 shadow-sm transition-[width] duration-300 ease-out sm:w-[64px] sm:rounded-2xl sm:px-2.5 sm:py-5 lg:py-6 lg:hover:w-[220px] lg:hover:shadow-lg"
-        >
+        <div className={sidebarInnerCls}>
           <Sidebar
             activePage={activePage}
             onPageChange={(k) => setActivePage(k as PageKey)}
+            pinned={pinned}
+            onTogglePin={togglePin}
           />
         </div>
       </aside>
 
       {/* Main content — offset for fixed sidebar, shifts right when sidebar expands */}
-      <div className="ml-[68px] transition-[margin] duration-300 ease-out sm:ml-[76px] lg:ml-[80px] lg:peer-hover:ml-[236px]">
+      <div className={mainMarginCls}>
         <div className="rounded-xl border border-border bg-shell p-3 shadow-sm sm:rounded-2xl sm:p-5 lg:p-6">
           <TopNav activePage={activePage} onNavigate={(k) => setActivePage(k as PageKey)} />
 
