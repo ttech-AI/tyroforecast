@@ -3,10 +3,10 @@ import { PublicClientApplication, InteractionRequiredAuthError } from '@azure/ms
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // MSAL CONFIGURATION
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// Azure SPA için Client/Tenant ID public clients — secret değil, fallback olarak
-// bundle'a hardcoded girer (env var'lar override eder; CI'da Variables ile gelir).
-const CLIENT_ID = import.meta.env.VITE_AZURE_CLIENT_ID || '951a2be8-e3e2-4595-bd93-27b1d11a563f';
-const TENANT_ID = import.meta.env.VITE_AZURE_TENANT_ID || '9efa3bdf-67ad-47e3-8dfb-d1df79a6d7fa';
+// Build-time env injection — `.env` (lokal dev) veya GitHub Actions Variables (CI).
+// Boş gelirse MSAL_ENABLED false olur ve UI "MSAL yapılandırılmamış" gösterir.
+const CLIENT_ID = import.meta.env.VITE_AZURE_CLIENT_ID;
+const TENANT_ID = import.meta.env.VITE_AZURE_TENANT_ID;
 const DATAVERSE_URL = import.meta.env.VITE_DATAVERSE_URL || 'https://operations-tiryaki.crm4.dynamics.com';
 const ENTITY_NAME = import.meta.env.VITE_DATAVERSE_ENTITY || 'mserp_tryaiinventoryagingreportentities';
 // Logical name (singular) — used by FetchXML. Standard Dataverse pluralization: entities → entity

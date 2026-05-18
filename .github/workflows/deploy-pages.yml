@@ -34,6 +34,21 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Debug — repo Variables injection check
+        run: |
+          echo "=== Repo Variables (set/empty kontrolü, değer maskeli) ==="
+          echo "VITE_AZURE_CLIENT_ID: ${{ vars.VITE_AZURE_CLIENT_ID != '' && 'SET' || 'EMPTY' }}"
+          echo "VITE_AZURE_TENANT_ID: ${{ vars.VITE_AZURE_TENANT_ID != '' && 'SET' || 'EMPTY' }}"
+          echo "VITE_DATAVERSE_URL:   ${{ vars.VITE_DATAVERSE_URL != '' && 'SET' || 'EMPTY' }}"
+          echo "İlk 8 karakter (debug — public client ID zaten gizli değil):"
+          echo "CLIENT_ID prefix:  ${VITE_AZURE_CLIENT_ID:0:8}"
+          echo "TENANT_ID prefix:  ${VITE_AZURE_TENANT_ID:0:8}"
+          echo "DV URL prefix:     ${VITE_DATAVERSE_URL:0:20}"
+        env:
+          VITE_AZURE_CLIENT_ID: ${{ vars.VITE_AZURE_CLIENT_ID }}
+          VITE_AZURE_TENANT_ID: ${{ vars.VITE_AZURE_TENANT_ID }}
+          VITE_DATAVERSE_URL: ${{ vars.VITE_DATAVERSE_URL }}
+
       - name: Build (Vite + SPA 404 fallback)
         run: npm run build:pages
         env:
