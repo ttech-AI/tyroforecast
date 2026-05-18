@@ -1,0 +1,67 @@
+name: Deploy to GitHub Pages
+
+# main'e her push'ta otomatik tetiklenir; manuel "Run workflow" de mümkün
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Pages deploy için gereken izinler
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Aynı anda tek deployment çalışsın; biri biterken yenisi başlamasın
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build (Vite + SPA 404 fallback)
+        run: npm run build:pages
+        env:
+          # Vite build-time env injection — GitHub repo Variables'tan okunur.
+          # Settings → Secrets and variables → Actions → Variables tab'ında set edilir.
+          VITE_AZURE_CLIENT_ID: ${{ vars.VITE_AZURE_CLIENT_ID }}
+          VITE_AZURE_TENANT_ID: ${{ vars.VITE_AZURE_TENANT_ID }}
+          VITE_DATAVERSE_URL: ${{ vars.VITE_DATAVERSE_URL }}
+          VITE_DATAVERSE_ENTITY: ${{ vars.VITE_DATAVERSE_ENTITY }}
+          VITE_HISTORICAL_DATAVERSE_URL: ${{ vars.VITE_HISTORICAL_DATAVERSE_URL }}
+          VITE_HISTORICAL_SALES_ENTITY: ${{ vars.VITE_HISTORICAL_SALES_ENTITY }}
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./dist
+
+  deploy:
+    name: Deploy
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
