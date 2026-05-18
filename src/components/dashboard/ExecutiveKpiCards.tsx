@@ -9,7 +9,7 @@ import { type ReactNode } from 'react'
 import { HugeiconsIcon } from '@hugeicons/react'
 import {
   PackageIcon,
-  Summation01Icon,
+  DashboardSquareAddIcon,
   UserAccountIcon,
   ChartLineData01Icon,
   TradeUpIcon,
@@ -72,7 +72,7 @@ export function ExecutiveKpiCards({ snapshot }: { snapshot: Snapshot }) {
     <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
       <KpiCard
         accent="#0a3d8f"
-        icon={<HugeiconsIcon icon={Summation01Icon} size={18} strokeWidth={1.9} color="#0a3d8f" />}
+        icon={<HugeiconsIcon icon={DashboardSquareAddIcon} size={18} strokeWidth={1.9} color="#0a3d8f" />}
         label="Toplam Miktar"
         valueNumber={snapshot.totalQtyLast12}
         valueFmt={fmtTon}

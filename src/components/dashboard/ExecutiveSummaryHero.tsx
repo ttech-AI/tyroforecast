@@ -83,7 +83,7 @@ export function ExecutiveSummaryHero({ snapshot }: { snapshot: Snapshot }) {
             boxShadow: '0 0 18px rgba(240,122,35,0.20)',
           }}
         >
-          <HugeiconsIcon icon={AiBrain04Icon} size={12} strokeWidth={2} />
+          <HugeiconsIcon icon={AiBrain04Icon} size={15} strokeWidth={2} />
           YÖNETİCİ ÖZETİ
         </motion.span>
 

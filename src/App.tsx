@@ -10,6 +10,8 @@ import { SeasonalActivityStrip } from './components/dashboard/SeasonalActivitySt
 import { EmptyDashboard } from './components/dashboard/EmptyDashboard'
 import { CrownIcon, Crown02Icon, Crown03Icon } from '@hugeicons/core-free-icons'
 import { SalesForecastPage } from './components/SalesForecastPage.jsx'
+import { SettingsPage } from './components/SettingsPage'
+import { ComingSoonPage } from './components/ComingSoonPage'
 import { useMsal } from './lib/forecast/msalContext.jsx'
 import { useHomeSnapshot } from './lib/forecast/homeSnapshot.js'
 
@@ -59,8 +61,8 @@ function App() {
               <DashboardHome onGoToForecast={() => setActivePage('forecast')} />
             )}
             {activePage === 'forecast' && <SalesForecastPage />}
-            {activePage === 'data' && <ComingSoon title="Veri yönetimi" />}
-            {activePage === 'settings' && <ComingSoon title="Ayarlar" />}
+            {activePage === 'data' && <ComingSoonPage pageKey="data" />}
+            {activePage === 'settings' && <SettingsPage />}
           </main>
         </div>
       </div>
@@ -116,17 +118,6 @@ function DashboardHome({ onGoToForecast }: { onGoToForecast: () => void }) {
 
       {/* Row 4 — Mevsim Profili + Aktivite Gauge */}
       <SeasonalActivityStrip snapshot={snapshot} />
-    </div>
-  )
-}
-
-function ComingSoon({ title }: { title: string }) {
-  return (
-    <div className="rounded-2xl border border-border bg-card p-8 text-center">
-      <h2 className="text-xl font-semibold text-foreground">{title}</h2>
-      <p className="mt-2 text-sm text-muted-foreground">
-        Bu modül yakında geliyor.
-      </p>
     </div>
   )
 }

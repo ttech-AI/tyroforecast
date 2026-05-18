@@ -9,7 +9,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { HugeiconsIcon } from '@hugeicons/react'
-import { ChartLineData01Icon, AiBrain03Icon, ArrowDown01Icon } from '@hugeicons/core-free-icons'
+import { ChartAnalysisIcon, AiBrain03Icon, ArrowDown01Icon } from '@hugeicons/core-free-icons'
 import { Star } from 'lucide-react'
 import { fmtTon, fmtMonthKey } from '../../lib/forecast/format.js'
 
@@ -199,11 +199,11 @@ export function ForecastMiniChart({ snapshot }: { snapshot: Snapshot }) {
   const isBest = activeModel?.id === snapshot.bestModelId
 
   return (
-    <section className="overflow-hidden rounded-2xl border border-border/60 bg-card shadow-[0_1px_2px_rgba(15,23,42,0.04),0_8px_24px_-12px_rgba(15,23,42,0.10)]">
+    <section className="flex h-full flex-col overflow-hidden rounded-2xl border border-border/60 bg-card shadow-[0_1px_2px_rgba(15,23,42,0.04),0_8px_24px_-12px_rgba(15,23,42,0.10)]">
       {/* Header */}
-      <header className="flex items-start justify-between gap-3 border-b border-border/60 px-4 py-3 md:px-5">
+      <header className="flex shrink-0 items-start justify-between gap-3 border-b border-border/60 px-4 py-3 md:px-5">
         <div className="flex items-center gap-2">
-          <HugeiconsIcon icon={ChartLineData01Icon} size={18} strokeWidth={1.9} color="#0a3d8f" />
+          <HugeiconsIcon icon={ChartAnalysisIcon} size={18} strokeWidth={1.9} color="#0a3d8f" />
           <div>
             <h3 className="text-[13px] font-bold leading-tight text-foreground">Tahmin Grafiği</h3>
             <p className="text-[10.5px] text-muted-foreground">Son 12 ay + sonraki {snapshot.horizon} ay</p>
@@ -288,14 +288,14 @@ export function ForecastMiniChart({ snapshot }: { snapshot: Snapshot }) {
         )}
       </header>
 
-      {/* Chart */}
-      <div className="px-3 py-3 md:px-4 md:py-4">
+      {/* Chart — flex-1 ile hero kartının yüksekliğine kadar uzar (taşma yok) */}
+      <div className="flex min-h-0 flex-1 flex-col px-3 py-3 md:px-4 md:py-4">
         <svg
           ref={svgRef}
           viewBox={`0 0 ${W} ${H}`}
           preserveAspectRatio="none"
-          className="block w-full"
-          style={{ height: 'clamp(160px, 22vw, 220px)' }}
+          className="block w-full flex-1"
+          style={{ minHeight: 160 }}
           onMouseMove={onMove}
           onMouseLeave={() => setHover(null)}
           aria-label="Forecast chart"

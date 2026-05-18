@@ -32,8 +32,14 @@ import {
   File02Icon,
   RotateClockwiseIcon,
   FlashIcon,
+  ChartAnalysisIcon,
+  DashboardSquareAddIcon,
+  CrownIcon,
+  CursorPointer01Icon,
+  AiBrain04Icon,
 } from '@hugeicons/core-free-icons'
 import { ChevronDown, ChevronUp, Info, Star } from 'lucide-react'
+import { motion } from 'framer-motion'
 import {
   applyScenario,
   isBaseline,
@@ -4134,23 +4140,258 @@ function Dot({ delay }) {
 }
 
 // ════════════════════════════════════════════════════════════════════════════
-// EmptyState — Bir trader seçin
+// EmptyState — Bir trader seçin (premium hero + 3-step flow + model preview)
 // ════════════════════════════════════════════════════════════════════════════
 function EmptyState() {
   return (
-    <div className="rounded-2xl border border-dashed border-border bg-card/40 p-10 text-center">
-      <div
-        className="mx-auto mb-3 grid h-14 w-14 place-items-center rounded-2xl text-primary"
-        style={{ background: 'linear-gradient(135deg, rgba(10,61,143,.08), rgba(59,130,246,.08))' }}
+    <div className="space-y-4 md:space-y-5">
+      {/* Hero — dark navy gradient with ambient orange glow */}
+      <section
+        className="relative overflow-hidden rounded-2xl"
+        style={{ background: 'linear-gradient(135deg, #0a1f4a 0%, #0a3d8f 55%, #1d4ed8 100%)' }}
       >
-        <HugeiconsIcon icon={AiBrain03Icon} size={32} strokeWidth={1.6} />
-      </div>
-      <h3 className="text-[15px] font-semibold text-foreground">İlk tahmin için trader seçin</h3>
-      <p className="mx-auto mt-2 max-w-md text-[12.5px] text-muted-foreground">
-        Ana trader veya alt trader filtresinden seçim yapıp <strong>Hesapla</strong> butonuna basın.
-        Sistem 8 forecast modelini koşturur, en iyi modeli backtest ile seçer ve ürün bazlı tahmin üretir.
-      </p>
+        {/* Dot pattern */}
+        <div
+          aria-hidden="true"
+          className="absolute inset-0"
+          style={{
+            backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px)',
+            backgroundSize: '24px 24px',
+            opacity: 0.45,
+          }}
+        />
+        {/* Animated orange glow */}
+        <motion.div
+          aria-hidden="true"
+          className="absolute -bottom-32 -right-32 h-96 w-96 rounded-full"
+          style={{ background: 'radial-gradient(circle, rgba(240,122,35,0.25) 0%, transparent 65%)' }}
+          animate={{ scale: [1, 1.12, 1], opacity: [0.7, 1, 0.7] }}
+          transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+        />
+        {/* Second glow blob — sol üst, mavi */}
+        <motion.div
+          aria-hidden="true"
+          className="absolute -left-32 -top-32 h-80 w-80 rounded-full"
+          style={{ background: 'radial-gradient(circle, rgba(59,130,246,0.22) 0%, transparent 65%)' }}
+          animate={{ scale: [1, 1.08, 1], opacity: [0.6, 0.9, 0.6] }}
+          transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut', delay: 1.2 }}
+        />
+        {/* Gradient top strip */}
+        <div
+          aria-hidden="true"
+          className="h-[3px]"
+          style={{ background: 'linear-gradient(90deg, #f07a23 0%, #fbbf24 50%, #f07a23 100%)' }}
+        />
+
+        <div className="relative px-5 py-10 text-center md:px-8 md:py-14">
+          {/* Pill */}
+          <motion.span
+            initial={{ scale: 0.92, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.32 }}
+            className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-[10.5px] font-extrabold uppercase tracking-wider"
+            style={{
+              background: 'rgba(240,122,35,0.18)',
+              color: '#fcd34d',
+              border: '1px solid rgba(251,191,36,0.30)',
+              boxShadow: '0 0 18px rgba(240,122,35,0.22)',
+            }}
+          >
+            <HugeiconsIcon icon={AiBrain04Icon} size={15} strokeWidth={2.2} />
+            AI Destekli Tahmin Motoru
+          </motion.span>
+
+          {/* Big animated icon */}
+          <motion.div
+            initial={{ scale: 0.85, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.45, delay: 0.08, ease: [0.16, 1, 0.3, 1] }}
+            className="relative mx-auto mt-5 grid h-20 w-20 place-items-center rounded-2xl text-white shadow-[0_10px_32px_-8px_rgba(0,0,0,0.40),inset_0_1px_0_rgba(255,255,255,0.22)]"
+            style={{ background: 'linear-gradient(135deg, #f07a23 0%, #fbbf24 100%)' }}
+          >
+            <HugeiconsIcon icon={AiBrain04Icon} size={38} strokeWidth={1.6} />
+            {/* Pulse ring */}
+            <motion.span
+              aria-hidden="true"
+              className="absolute inset-0 rounded-2xl"
+              style={{ border: '2px solid rgba(251,191,36,0.6)' }}
+              animate={{ scale: [1, 1.18, 1], opacity: [0.5, 0, 0.5] }}
+              transition={{ duration: 2.4, repeat: Infinity, ease: 'easeOut' }}
+            />
+          </motion.div>
+
+          <motion.h2
+            initial={{ y: 8, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.42, delay: 0.14 }}
+            className="mt-5 text-[22px] font-extrabold tracking-tight text-white md:text-[26px]"
+          >
+            İlk tahmin için trader seçin
+          </motion.h2>
+
+          <motion.p
+            initial={{ y: 8, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.42, delay: 0.20 }}
+            className="mx-auto mt-3 max-w-2xl text-[13px] leading-relaxed text-slate-200/90 md:text-[14px]"
+          >
+            Yukarıdaki <strong className="text-amber-200">trader filtresinden</strong> bir trader seçip{' '}
+            <strong className="text-amber-200">Hesapla</strong> butonuna bastığında sistem <strong className="text-amber-200">8 forecast modelini</strong> aynı anda koşturur,
+            backtest ile en iyi modeli seçer ve ürün bazlı detaylı tahmin üretir.
+          </motion.p>
+        </div>
+      </section>
+
+      {/* 3-step flow */}
+      <section>
+        <div className="mb-3 flex items-center gap-2 px-1">
+          <span className="text-[10.5px] font-extrabold uppercase tracking-wider text-muted-foreground">
+            Nasıl Çalışır?
+          </span>
+          <span className="h-px flex-1 bg-border/60" />
+        </div>
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-3 lg:gap-4">
+          <StepTile
+            step="1"
+            icon={CursorPointer01Icon}
+            accent="#0a3d8f"
+            title="Trader Seç"
+            desc="Ana veya alt trader filtresinden bir trader belirle"
+            delay={0.05}
+          />
+          <StepTile
+            step="2"
+            icon={FlashIcon}
+            accent="#f07a23"
+            title="Hesapla'ya Bas"
+            desc="8 model paralel koşar, en iyi backtest skoruyla seçilir"
+            delay={0.12}
+          />
+          <StepTile
+            step="3"
+            icon={ChartAnalysisIcon}
+            accent="#10b981"
+            title="Sonuçları İncele"
+            desc="Grafik, KPI'lar, ürün tahminleri ve senaryo simülasyonu"
+            delay={0.19}
+          />
+        </div>
+      </section>
+
+      {/* 8 Model preview strip */}
+      <section className="overflow-hidden rounded-2xl border border-border/60 bg-card shadow-[0_1px_2px_rgba(15,23,42,0.04),0_8px_24px_-12px_rgba(15,23,42,0.10)]">
+        <header className="flex items-center gap-2 border-b border-border/60 px-4 py-3 md:px-5">
+          <HugeiconsIcon icon={Flowchart02Icon} size={16} strokeWidth={1.9} color="#0a3d8f" />
+          <div className="min-w-0 flex-1">
+            <h3 className="text-[13px] font-bold leading-tight text-foreground">8 Forecast Modeli</h3>
+            <p className="mt-0.5 text-[10.5px] font-medium text-muted-foreground">
+              Hepsi paralel koşar — en iyi MAPE'ye sahip olan Best Fit olarak işaretlenir
+            </p>
+          </div>
+          <span
+            className="inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-[9.5px] font-extrabold uppercase tracking-wider"
+            style={{
+              background: 'rgba(16,185,129,0.10)',
+              borderColor: 'rgba(4,120,87,0.22)',
+              color: '#047857',
+            }}
+          >
+            <HugeiconsIcon icon={CheckmarkBadge02Icon} size={11} strokeWidth={2.2} />
+            Otomatik
+          </span>
+        </header>
+        <ul className="grid grid-cols-2 gap-px bg-border/40 md:grid-cols-4">
+          {FORECAST_MODELS.map((m, i) => (
+            <ModelPreviewChip key={m.id} model={m} delay={i * 0.04} />
+          ))}
+        </ul>
+      </section>
+
+      {/* Quick tip */}
+      <section
+        className="rounded-2xl border border-border/60 px-5 py-4 md:px-6 md:py-5"
+        style={{
+          background: 'linear-gradient(135deg, rgba(240,122,35,0.05), rgba(10,61,143,0.04))',
+        }}
+      >
+        <div className="flex flex-wrap items-center gap-3">
+          <HugeiconsIcon icon={Target02Icon} size={18} strokeWidth={1.9} color="#f07a23" />
+          <div className="min-w-0 flex-1">
+            <div className="text-[13px] font-bold text-foreground">İpucu</div>
+            <p className="mt-0.5 text-[11.5px] leading-relaxed text-muted-foreground">
+              Hesaplamadan sonra senaryo simülasyonu açıp{' '}
+              <strong className="text-foreground/85">fiyat / kapasite / pazar payı</strong> ayarlarıyla
+              farklı koşulların tahmin üzerindeki etkisini canlı görebilirsin.
+            </p>
+          </div>
+        </div>
+      </section>
     </div>
+  )
+}
+
+function StepTile({ step, icon, accent, title, desc, delay }) {
+  return (
+    <motion.div
+      initial={{ y: 10, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.42, delay }}
+      className="group relative overflow-hidden rounded-xl border border-border/60 bg-card p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-foreground/15 hover:shadow-[0_4px_12px_-2px_rgba(15,23,42,0.08)] md:p-5"
+    >
+      {/* Step number watermark */}
+      <span
+        aria-hidden="true"
+        className="absolute -right-2 -top-3 text-[64px] font-black leading-none tracking-tight"
+        style={{ color: `${accent}10` }}
+      >
+        {step}
+      </span>
+      <div className="relative">
+        <span
+          className="grid h-10 w-10 place-items-center rounded-xl border-[1.5px] bg-card"
+          style={{
+            borderColor: `${accent}38`,
+            boxShadow: `0 1px 2px rgba(15,23,42,0.04), inset 0 1px 0 rgba(255,255,255,0.5)`,
+          }}
+        >
+          <HugeiconsIcon icon={icon} size={18} strokeWidth={1.9} color={accent} />
+        </span>
+        <div className="mt-3 flex items-center gap-2">
+          <span
+            className="inline-flex h-5 min-w-5 items-center justify-center rounded-md px-1.5 text-[10px] font-extrabold tabular-nums text-white"
+            style={{ background: accent }}
+          >
+            {step}
+          </span>
+          <span className="text-[13px] font-bold leading-tight text-foreground">{title}</span>
+        </div>
+        <p className="mt-1.5 text-[11.5px] leading-relaxed text-muted-foreground">{desc}</p>
+      </div>
+    </motion.div>
+  )
+}
+
+function ModelPreviewChip({ model, delay }) {
+  return (
+    <motion.li
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3, delay }}
+      className="flex items-start gap-2.5 bg-card px-3 py-3 transition-colors hover:bg-muted/40 md:px-4"
+    >
+      <span
+        className="mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-md"
+        style={{ background: 'rgba(10,61,143,0.08)', color: '#0a3d8f' }}
+      >
+        <HugeiconsIcon icon={MagicWand02Icon} size={13} strokeWidth={2.1} />
+      </span>
+      <div className="min-w-0 flex-1">
+        <div className="truncate text-[12px] font-bold leading-tight text-foreground">{model.label}</div>
+        {model.short && (
+          <div className="mt-0.5 truncate text-[10px] font-medium text-muted-foreground">{model.short}</div>
+        )}
+      </div>
+    </motion.li>
   )
 }
 
